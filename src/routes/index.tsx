@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type SyntheticEvent } from "react";
 
 export const Route = createFileRoute("/")({
   component: AurevaHome,
@@ -20,6 +20,33 @@ const LIVING_VIDEO =
 
 const img = (id: string, w = 1600) =>
   `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+
+// Fallback used when a hotlinked Pexels image 404s or times out, so a dead
+// link degrades to a tasteful placeholder tile instead of a blank white box.
+const IMG_FALLBACK =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#d9cfc0"/>
+          <stop offset="1" stop-color="#efe8db"/>
+        </linearGradient>
+      </defs>
+      <rect width="800" height="800" fill="url(#g)"/>
+    </svg>`
+  );
+
+const handleImgError = (e: SyntheticEvent<HTMLImageElement>) => {
+  const el = e.currentTarget;
+  if (el.src !== IMG_FALLBACK) el.src = IMG_FALLBACK;
+};
+
+const handleVideoError = (e: SyntheticEvent<HTMLVideoElement>) => {
+  // Hide a video that fails to load/play (e.g. hotlink dead or blocked)
+  // rather than leaving an empty black/white frame in its place.
+  e.currentTarget.style.display = "none";
+};
 
 // --- Data ------------------------------------------------------------------
 
@@ -212,6 +239,20 @@ const FAQ = [
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal, .img-mask");
+
+    // Safety net: if anything is still hidden after 1.2s (slow hydration,
+    // an observer that never fires, fast scroll past threshold, etc.),
+    // force it visible. Better a missed animation than a permanently
+    // blank photo.
+    const forceReveal = () => {
+      els.forEach((el) => el.classList.add("is-visible"));
+    };
+
+    if (typeof IntersectionObserver === "undefined") {
+      forceReveal();
+      return;
+    }
+
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -224,7 +265,13 @@ function useReveal() {
       { threshold: 0.15, rootMargin: "0px 0px -60px 0px" },
     );
     els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+
+    const safetyTimer = window.setTimeout(forceReveal, 1200);
+
+    return () => {
+      io.disconnect();
+      window.clearTimeout(safetyTimer);
+    };
   }, []);
 }
 
@@ -318,6 +365,7 @@ function Hero() {
         loop
         playsInline
         preload="metadata"
+        onError={handleVideoError}
         poster={img("31032367", 1920)}
       />
       <div className="absolute inset-0 bg-warm-black/35" />
@@ -447,6 +495,7 @@ function PropertyCard({ property, index }: { property: Property; index: number }
           src={property.image}
           alt={property.name}
           loading="lazy"
+          onError={handleImgError}
           className="h-full w-full object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-[1.04]"
         />
       </div>
@@ -494,11 +543,13 @@ function LuxuryLiving() {
         <video
           className="h-full w-full object-cover"
           src={LIVING_VIDEO}
+          poster={img("6957094", 1920)}
           autoPlay
           muted
           loop
           playsInline
           preload="metadata"
+        onError={handleVideoError}
         />
         <div className="absolute inset-0 bg-warm-black/25" />
         <div className="absolute inset-x-0 bottom-0 p-6 md:p-14">
@@ -517,6 +568,7 @@ function LuxuryLiving() {
               src={img("6957094")}
               alt="A quiet Lagos interior"
               loading="lazy"
+          onError={handleImgError}
               className="h-full w-full object-cover"
             />
           </div>
@@ -543,6 +595,7 @@ function LuxuryLiving() {
                 src={img("6663039")}
                 alt="Bedroom interior"
                 loading="lazy"
+          onError={handleImgError}
                 className="h-full w-full object-cover"
               />
             </div>
@@ -551,6 +604,7 @@ function LuxuryLiving() {
                 src={img("6315804")}
                 alt="Kitchen interior"
                 loading="lazy"
+          onError={handleImgError}
                 className="h-full w-full object-cover"
               />
             </div>
@@ -562,11 +616,13 @@ function LuxuryLiving() {
         <video
           className="h-full w-full object-cover"
           src={INTERIOR_WALK}
+          poster={img("6663039", 1920)}
           autoPlay
           muted
           loop
           playsInline
           preload="metadata"
+        onError={handleVideoError}
         />
       </div>
     </section>
@@ -605,6 +661,7 @@ function Developments() {
                   src={d.image}
                   alt={d.name}
                   loading="lazy"
+          onError={handleImgError}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -644,11 +701,13 @@ function Investment() {
         <video
           className="h-full w-full object-cover"
           src={AERIAL_VIDEO}
+          poster={img("8134755", 1920)}
           autoPlay
           muted
           loop
           playsInline
           preload="metadata"
+        onError={handleVideoError}
         />
       </div>
       <div className="absolute inset-0 bg-warm-black/60" />
@@ -721,6 +780,7 @@ function Neighbourhoods() {
                   src={n.image}
                   alt={n.name}
                   loading="lazy"
+          onError={handleImgError}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -777,6 +837,7 @@ function WhyAureva() {
               src={img("8134755")}
               alt="Architectural detail"
               loading="lazy"
+          onError={handleImgError}
               className="h-full w-full object-cover"
             />
           </div>
@@ -902,11 +963,13 @@ function Contact() {
         <video
           className="h-full w-full object-cover"
           src={BEDROOM_VIDEO}
+          poster={img("6315804", 1920)}
           autoPlay
           muted
           loop
           playsInline
           preload="metadata"
+        onError={handleVideoError}
         />
       </div>
       <div className="absolute inset-0 bg-warm-black/70" />
