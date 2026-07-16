@@ -161,6 +161,7 @@ type Neighbourhood = {
   note: string;
   copy: string;
   image: string;
+  fromVI: string;
 };
 
 const NEIGHBOURHOODS: Neighbourhood[] = [
@@ -169,24 +170,28 @@ const NEIGHBOURHOODS: Neighbourhood[] = [
     note: "Old Lagos, quietly reworked",
     copy: "Broad, tree-lined streets, walled compounds and a rhythm that has remained largely undisturbed for six decades.",
     image: img("12039376"),
+    fromVI: "10 MIN FROM VI",
   },
   {
     name: "Banana Island",
     note: "The private address",
     copy: "A single causeway, one gate, and the highest concentration of purpose-built residences in West Africa.",
     image: img("37921899"),
+    fromVI: "15 MIN FROM VI",
   },
   {
     name: "Eko Atlantic",
     note: "New land, considered",
     copy: "Ten square kilometres reclaimed from the sea, master-planned block by block, with the ocean on three sides.",
     image: img("19219055"),
+    fromVI: "5 MIN FROM VI",
   },
   {
     name: "Lekki Peninsula",
     note: "Where the city meets the coast",
     copy: "A slower shoreline of gated estates, garden restaurants and long stretches of quiet, uninterrupted beach.",
     image: img("4878949"),
+    fromVI: "30 MIN FROM VI",
   },
 ];
 
@@ -383,7 +388,7 @@ function Hero() {
           <h1 className="font-serif text-[13vw] leading-[0.95] tracking-[-0.02em] text-ivory md:text-[7.2vw]">
             Exceptional Homes.
             <br />
-            <span className="italic font-light text-gold-soft">Extraordinary Living.</span>
+            <span className="survey-mark font-light">Extraordinary Living.</span>
           </h1>
         </div>
 
@@ -410,11 +415,11 @@ function Hero() {
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-6 z-10 hidden text-[10px] uppercase tracking-[0.3em] text-ivory/60 md:block">
-        Lagos · Est. 2014
+      <div className="absolute bottom-6 left-6 z-10 hidden font-mono text-[10px] tracking-[0.02em] text-ivory/60 md:block">
+        6.4531°N 3.4197°E — LAGOS
       </div>
-      <div className="absolute bottom-6 right-6 z-10 hidden text-[10px] uppercase tracking-[0.3em] text-ivory/60 md:block">
-        Scroll ↓
+      <div className="absolute bottom-6 right-6 z-10 hidden font-mono text-[10px] tracking-[0.02em] text-ivory/60 md:block">
+        ↓ SCROLL
       </div>
     </section>
   );
@@ -501,7 +506,7 @@ function PropertyCard({ property, index }: { property: Property; index: number }
       </div>
       <div className="reveal mt-8 flex items-start justify-between gap-6">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-ink">
+          <p className="font-mono text-[11px] tracking-[0.01em] text-muted-ink">
             {property.location}
           </p>
           <h3 className="mt-3 font-serif text-2xl leading-tight md:text-[2rem]">
@@ -509,19 +514,19 @@ function PropertyCard({ property, index }: { property: Property; index: number }
           </h3>
         </div>
         <div className="text-right">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-ink">Guide</p>
+          <p className="font-mono text-[11px] tracking-[0.01em] text-gold">GUIDE</p>
           <p className="mt-3 font-serif text-xl md:text-2xl">{property.price}</p>
         </div>
       </div>
       <p className="reveal mt-5 max-w-md text-[14px] leading-[1.8] text-charcoal/80">
         {property.copy}
       </p>
-      <div className="reveal mt-6 flex items-center gap-6 text-[11px] uppercase tracking-[0.22em] text-muted-ink">
-        <span>{property.beds} Bed</span>
+      <div className="reveal mt-6 flex items-center gap-6 font-mono text-[11px] tracking-[0.01em] text-muted-ink">
+        <span>{property.beds} BED</span>
         <span className="h-3 w-px bg-hairline" />
-        <span>{property.baths} Bath</span>
+        <span>{property.baths} BATH</span>
         <span className="h-3 w-px bg-hairline" />
-        <span>{property.sqm} m²</span>
+        <span>{property.sqm} M²</span>
       </div>
       <a
         href="#contact"
@@ -555,7 +560,7 @@ function LuxuryLiving() {
         <div className="absolute inset-x-0 bottom-0 p-6 md:p-14">
           <p className="eyebrow text-ivory/70">A Way of Living</p>
           <h2 className="mt-4 max-w-3xl font-serif text-4xl leading-[1.02] text-ivory md:text-7xl">
-            The <span className="italic font-light">quiet hours</span> are the
+            The <span className="survey-mark font-light">quiet hours</span> are the
             ones we design for.
           </h2>
         </div>
@@ -784,8 +789,8 @@ function Neighbourhoods() {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <p className="reveal mt-6 text-[11px] uppercase tracking-[0.22em] text-muted-ink">
-                0{i + 1} · {n.note}
+              <p className="reveal mt-6 font-mono text-[11px] tracking-[0.01em] text-gold">
+                {n.fromVI} · {n.note}
               </p>
               <h3 className="reveal mt-3 font-serif text-2xl md:text-3xl">{n.name}</h3>
               <p className="reveal mt-3 text-[14px] leading-[1.8] text-charcoal/80">
@@ -980,7 +985,7 @@ function Contact() {
           <h2 className="reveal mt-6 font-serif text-4xl leading-[1.02] text-ivory md:text-[4.5rem]">
             Write to us,
             <br />
-            <span className="italic font-light text-gold-soft">at your leisure.</span>
+            <span className="survey-mark font-light">at your leisure.</span>
           </h2>
           <div className="reveal mt-14 space-y-8 text-[13px] leading-relaxed text-ivory/70">
             <div>
