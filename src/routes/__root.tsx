@@ -88,10 +88,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         property: "og:description",
         content:
-          "Curated luxury residences, waterfront homes and private villas across Lagos.",
+          "AUREVA Estates curates the finest waterfront residences, penthouses and private villas across Lagos, Nigeria.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "AUREVA Estates — Exceptional Homes. Extraordinary Living." },
+      { name: "twitter:description", content: "AUREVA Estates curates the finest waterfront residences, penthouses and private villas across Lagos, Nigeria." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/239e8d50-2bd2-4b98-92a9-d16165abd0c7/id-preview-6ad340f8--8383f8ce-95d5-42c7-bad3-5d6326a35aed.lovable.app-1784215286373.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/239e8d50-2bd2-4b98-92a9-d16165abd0c7/id-preview-6ad340f8--8383f8ce-95d5-42c7-bad3-5d6326a35aed.lovable.app-1784215286373.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
