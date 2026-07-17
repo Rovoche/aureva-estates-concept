@@ -748,7 +748,7 @@ function LuxuryLiving() {
 
       <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-6 py-24 md:grid-cols-12 md:gap-8 md:px-10 md:py-40">
         <div className="md:col-span-5">
-          <div className="img-mask plot-frame aspect-[4/5] overflow-hidden bg-sand">
+          <div data-cursor-view className="img-mask plot-frame aspect-[4/5] overflow-hidden bg-sand">
             <img
               src={img("6957094")}
               alt="A quiet Lagos interior"
@@ -775,7 +775,7 @@ function LuxuryLiving() {
           </p>
 
           <div className="reveal mt-14 grid grid-cols-2 gap-8">
-            <div className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
+            <div data-cursor-view className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
               <img
                 src={img("6663039")}
                 alt="Bedroom interior"
@@ -784,7 +784,7 @@ function LuxuryLiving() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="img-mask plot-frame aspect-[3/4] mt-16 overflow-hidden bg-sand">
+            <div data-cursor-view className="img-mask plot-frame aspect-[3/4] mt-16 overflow-hidden bg-sand">
               <img
                 src={img("6315804")}
                 alt="Kitchen interior"
@@ -841,7 +841,7 @@ function Developments() {
                 i % 2 === 1 ? "md:[&>:first-child]:order-2" : ""
               }`}
             >
-              <div className="img-mask plot-frame md:col-span-7 aspect-[3/2] overflow-hidden bg-sand">
+              <div data-cursor-view className="img-mask plot-frame md:col-span-7 aspect-[3/2] overflow-hidden bg-sand">
                 <img
                   src={d.image}
                   alt={d.name}
@@ -969,7 +969,7 @@ function Neighbourhoods() {
         <div className="mt-20 grid grid-cols-1 gap-x-6 gap-y-16 md:grid-cols-2 md:gap-y-24 lg:grid-cols-4">
           {NEIGHBOURHOODS.map((n, i) => (
             <div key={n.name} className={i % 2 === 1 ? "lg:mt-20" : ""}>
-              <div className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
+              <div data-cursor-view className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
                 <img
                   src={n.image}
                   alt={n.name}
@@ -1026,7 +1026,7 @@ function WhyAureva() {
           <h2 className="reveal mt-6 font-serif text-4xl leading-[1.05] md:text-[3.25rem]">
             Four principles the practice is built upon.
           </h2>
-          <div className="reveal mt-10 img-mask aspect-[4/5] overflow-hidden bg-sand">
+          <div data-cursor-view className="reveal mt-10 img-mask aspect-[4/5] overflow-hidden bg-sand">
             <img
               src={img("8134755")}
               alt="Architectural detail"
@@ -1062,25 +1062,60 @@ function WhyAureva() {
 // --- Testimonials ----------------------------------------------------------
 
 function Testimonials() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = window.setInterval(() => {
+      setActive((i) => (i + 1) % TESTIMONIALS.length);
+    }, 6000);
+    return () => window.clearInterval(id);
+  }, [paused]);
+
+  const t = TESTIMONIALS[active];
+
   return (
-    <section className="border-b border-hairline bg-ivory">
-      <div className="mx-auto max-w-[1440px] px-6 py-28 md:px-10 md:py-40">
-        <p className="eyebrow reveal">In their words</p>
-        <div className="mt-16 grid grid-cols-1 gap-16 md:grid-cols-3 md:gap-10">
-          {TESTIMONIALS.map((t, i) => (
-            <figure key={i} className="reveal">
-              <div className="gold-line mb-8 w-10" />
-              <blockquote className="font-serif text-2xl leading-[1.35] text-warm-black md:text-[1.75rem]">
-                <span className="text-gold">“</span>
-                {t.quote}
-                <span className="text-gold">”</span>
-              </blockquote>
-              <figcaption className="mt-8 text-[11px] uppercase tracking-[0.22em] text-muted-ink">
-                <span className="text-warm-black">{t.name}</span>
-                <span className="mx-2 text-hairline">/</span>
-                <span>{t.role}</span>
-              </figcaption>
-            </figure>
+    <section
+      className="border-b border-hairline bg-ivory"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="mx-auto max-w-[900px] px-6 py-28 text-center md:py-40">
+        <p className="eyebrow reveal mx-auto w-fit">In their words</p>
+
+        <div className="relative mt-16 min-h-[220px] md:min-h-[180px]">
+          <blockquote
+            key={active}
+            className="reveal is-visible font-serif text-[1.6rem] leading-[1.35] text-warm-black md:text-[2.1rem]"
+            style={{ animation: "fade-up 0.7s cubic-bezier(0.2,0.7,0.2,1)" }}
+          >
+            <span className="text-gold">“</span>
+            {t.quote}
+            <span className="text-gold">”</span>
+          </blockquote>
+          <p className="mt-8 font-mono text-[11px] tracking-[0.01em] text-muted-ink">
+            {t.name.toUpperCase()} · {t.role.toUpperCase()}
+          </p>
+        </div>
+
+        <div className="mx-auto mt-14 flex w-full max-w-xs items-center gap-2">
+          {TESTIMONIALS.map((item, i) => (
+            <button
+              key={item.name}
+              type="button"
+              aria-label={`Show testimonial ${i + 1}`}
+              onClick={() => setActive(i)}
+              className="h-px flex-1 overflow-hidden bg-hairline"
+            >
+              <span
+                className="block h-full bg-gold"
+                style={{
+                  width: i === active ? "100%" : i < active ? "100%" : "0%",
+                  transition: i === active ? "width 6s linear" : "width 0.3s ease",
+                }}
+              />
+            </button>
           ))}
         </div>
       </div>
