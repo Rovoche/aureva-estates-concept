@@ -18,7 +18,6 @@
   --color-gold-soft: var(--gold-soft);
   --color-muted-ink: var(--muted-ink);
   --color-hairline: var(--hairline);
-  --color-lagoon: var(--lagoon);
 
   --color-background: var(--ivory);
   --color-foreground: var(--charcoal);
@@ -44,21 +43,22 @@
 :root {
   --radius: 0.125rem;
 
-  /* Stone paper — cooler + greyer than the standard AI-luxury cream */
-  --ivory: oklch(0.955 0.012 92);
-  --stone-warm: oklch(0.92 0.015 88);
-  --sand: oklch(0.87 0.02 85);
-  /* Ink indigo — blue-black referencing lagoon water at night, not brown warm-black */
-  --charcoal: oklch(0.27 0.02 265);
-  --warm-black: oklch(0.15 0.025 265);
+  /* True near-white/near-black monochrome base — the rust accent below is the
+     only saturated colour anywhere in the system, deliberately, following
+     the restrained-palette pattern used by Compass (black/white, photography
+     as the only visual accent) and the LVMH-house convention of one metal
+     against monochrome rather than a "warm luxury cream" board. */
+  --ivory: oklch(0.97 0.004 90);
+  --stone-warm: oklch(0.93 0.005 88);
+  --sand: oklch(0.88 0.007 85);
+  --charcoal: oklch(0.26 0.008 265);
+  --warm-black: oklch(0.13 0.01 265);
   /* Laterite rust — Lagos red-earth/brick, deliberately darker & more saturated than
      a gold/terracotta accent so it reads as mineral, not decorative */
   --gold: oklch(0.46 0.135 40);
   --gold-soft: oklch(0.62 0.1 45);
-  /* Lagoon — a rare third accent, sea-glass green, used sparingly */
-  --lagoon: oklch(0.5 0.06 175);
-  --muted-ink: oklch(0.5 0.02 265);
-  --hairline: oklch(0.82 0.015 85);
+  --muted-ink: oklch(0.48 0.006 265);
+  --hairline: oklch(0.83 0.006 85);
 }
 
 @layer base {
