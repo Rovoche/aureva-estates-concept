@@ -331,10 +331,14 @@ function CustomCursor() {
     };
 
     const onOver = (e: MouseEvent) => {
-      const hit = (e.target as HTMLElement)?.closest?.(
-        "a, button, [data-cursor-hover]",
+      const target = e.target as HTMLElement;
+      const viewHit = target?.closest?.("[data-cursor-view]");
+      const linkHit = target?.closest?.("a, button, [data-cursor-hover]");
+      ringRef.current?.classList.toggle("is-view", Boolean(viewHit));
+      ringRef.current?.classList.toggle(
+        "is-hovering",
+        Boolean(linkHit) && !viewHit,
       );
-      ringRef.current?.classList.toggle("is-hovering", Boolean(hit));
     };
 
     const loop = () => {
@@ -362,7 +366,10 @@ function CustomCursor() {
   return (
     <>
       <div ref={dotRef} className="cursor-dot" aria-hidden="true" />
-      <div ref={ringRef} className="cursor-ring" aria-hidden="true" />
+      <div ref={ringRef} className="cursor-ring" aria-hidden="true">
+        <div className="cursor-ring-inner" />
+        <span className="cursor-ring-label">VIEW</span>
+      </div>
     </>
   );
 }
@@ -530,7 +537,6 @@ function Hero() {
         playsInline
         preload="metadata"
         onError={handleVideoError}
-        poster={img("31032367", 1920)}
       />
       <div
         className="absolute inset-0"
@@ -660,7 +666,10 @@ function PropertyCard({ property, index }: { property: Property; index: number }
   const offset = index % 2 === 1 ? "md:mt-24" : "";
   return (
     <article className={`group ${offset}`}>
-      <div className="img-mask plot-frame relative aspect-[4/5] w-full overflow-hidden bg-sand">
+      <div
+        data-cursor-view
+        className="img-mask plot-frame relative aspect-[4/5] w-full overflow-hidden bg-sand"
+      >
         <img
           src={property.image}
           alt={property.name}
