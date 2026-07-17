@@ -48,6 +48,68 @@ const handleVideoError = (e: SyntheticEvent<HTMLVideoElement>) => {
   e.currentTarget.style.display = "none";
 };
 
+// --- Signature motif ---------------------------------------------------
+// A drawn aerial plot boundary — the one recurring graphic device tying the
+// whole site to its actual subject (surveyed land, not generic "luxury").
+// pathLength="1" normalises every shape so the CSS draw-in transition
+// (.plot-draw, in styles.css) works the same regardless of geometry.
+
+function PlotLinework({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 640 640"
+      className={`plot-draw pointer-events-none ${className}`}
+      aria-hidden="true"
+    >
+      <polygon
+        className="plot-mark"
+        pathLength="1"
+        points="96,540 74,268 210,84 452,58 566,204 522,430 388,566 168,584"
+      />
+      <polygon
+        className="plot-mark"
+        pathLength="1"
+        points="210,420 198,286 300,196 404,214 396,368 300,452"
+        opacity="0.6"
+      />
+      <line className="plot-mark" pathLength="1" x1="74" y1="268" x2="566" y2="204" opacity="0.35" />
+      <line className="plot-mark" pathLength="1" x1="96" y1="540" x2="522" y2="430" opacity="0.35" />
+      <g className="plot-mark" pathLength="1" opacity="0.8">
+        <circle cx="566" cy="96" r="34" />
+        <line x1="566" y1="66" x2="566" y2="126" />
+        <line x1="536" y1="96" x2="596" y2="96" />
+      </g>
+      <text
+        x="566"
+        y="150"
+        textAnchor="middle"
+        fill="currentColor"
+        style={{ font: "500 11px var(--font-mono)", letterSpacing: "0.03em" }}
+      >
+        N
+      </text>
+      <text
+        x="96"
+        y="562"
+        fill="currentColor"
+        style={{ font: "400 10px var(--font-mono)", letterSpacing: "0.02em" }}
+      >
+        PLOT 14B · 2,450 M²
+      </text>
+    </svg>
+  );
+}
+
+function RegisterMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={`plot-mark h-4 w-4 ${className}`} aria-hidden="true">
+      <line x1="12" y1="0" x2="12" y2="24" />
+      <line x1="0" y1="12" x2="24" y2="12" />
+      <circle cx="12" cy="12" r="6" />
+    </svg>
+  );
+}
+
 // --- Data ------------------------------------------------------------------
 
 type Property = {
@@ -243,7 +305,7 @@ const FAQ = [
 
 function useReveal() {
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal, .img-mask");
+    const els = document.querySelectorAll(".reveal, .img-mask, .plot-draw");
 
     // Safety net: if anything is still hidden after 1.2s (slow hydration,
     // an observer that never fires, fast scroll past threshold, etc.),
@@ -382,6 +444,43 @@ function Hero() {
         }}
       />
 
+      {/* Signature: an abstracted survey drawing of a reclaimed Lagos
+          waterfront parcel — the site's one graphic idea, kept quiet
+          enough to sit behind the headline rather than compete with it. */}
+      <svg
+        aria-hidden
+        viewBox="0 0 1600 900"
+        preserveAspectRatio="xMidYMid slice"
+        className="pointer-events-none absolute inset-0 z-[5] h-full w-full"
+      >
+        <g fill="none" stroke="var(--ivory)" strokeWidth="1" opacity="0.22">
+          <path d="M -20 640 C 220 560, 360 610, 520 540 S 780 460, 940 500 S 1180 420, 1360 470 L 1620 430" />
+          <path d="M -20 700 C 240 630, 400 670, 560 610 S 800 540, 980 570 S 1200 500, 1400 540 L 1620 500" strokeDasharray="2 7" />
+        </g>
+        <g fill="none" stroke="var(--gold-soft)" strokeWidth="1" opacity="0.55">
+          <polygon points="1120,330 1320,300 1360,430 1180,470" />
+          <line x1="1120" y1="330" x2="1320" y2="300" strokeDasharray="4 5" opacity="0.5" />
+        </g>
+        {[
+          [1120, 330], [1320, 300], [1360, 430], [1180, 470],
+        ].map(([cx, cy]) => (
+          <g key={`${cx}-${cy}`} stroke="var(--gold-soft)" opacity="0.6">
+            <line x1={cx - 6} y1={cy} x2={cx + 6} y2={cy} />
+            <line x1={cx} y1={cy - 6} x2={cx} y2={cy + 6} />
+          </g>
+        ))}
+        <text x="1132" y="386" fontFamily="var(--font-mono)" fontSize="11" fill="var(--gold-soft)" opacity="0.75">
+          LOT 07A — 0.42 HA
+        </text>
+        <g stroke="var(--ivory)" opacity="0.3">
+          <line x1="90" y1="120" x2="90" y2="168" />
+          <line x1="72" y1="120" x2="108" y2="120" />
+        </g>
+        <text x="80" y="192" fontFamily="var(--font-mono)" fontSize="11" fill="var(--ivory)" opacity="0.4">
+          N
+        </text>
+      </svg>
+
       <div className="relative z-10 flex h-full flex-col justify-between px-6 py-28 md:px-12 md:py-32">
         <div />
         <div className="max-w-4xl">
@@ -415,6 +514,8 @@ function Hero() {
         </div>
       </div>
 
+      <RegisterMark className="absolute left-6 top-6 z-10 hidden text-ivory/50 md:block" />
+      <RegisterMark className="absolute right-6 top-6 z-10 hidden text-ivory/50 md:block" />
       <div className="absolute bottom-6 left-6 z-10 hidden font-mono text-[10px] tracking-[0.02em] text-ivory/60 md:block">
         6.4531°N 3.4197°E — LAGOS
       </div>
@@ -495,7 +596,7 @@ function PropertyCard({ property, index }: { property: Property; index: number }
   const offset = index % 2 === 1 ? "md:mt-24" : "";
   return (
     <article className={`group ${offset}`}>
-      <div className="img-mask relative aspect-[4/5] w-full overflow-hidden bg-sand">
+      <div className="img-mask plot-frame relative aspect-[4/5] w-full overflow-hidden bg-sand">
         <img
           src={property.image}
           alt={property.name}
@@ -568,7 +669,7 @@ function LuxuryLiving() {
 
       <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-6 py-24 md:grid-cols-12 md:gap-8 md:px-10 md:py-40">
         <div className="md:col-span-5">
-          <div className="img-mask aspect-[4/5] overflow-hidden bg-sand">
+          <div className="img-mask plot-frame aspect-[4/5] overflow-hidden bg-sand">
             <img
               src={img("6957094")}
               alt="A quiet Lagos interior"
@@ -595,7 +696,7 @@ function LuxuryLiving() {
           </p>
 
           <div className="reveal mt-14 grid grid-cols-2 gap-8">
-            <div className="img-mask aspect-[3/4] overflow-hidden bg-sand">
+            <div className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
               <img
                 src={img("6663039")}
                 alt="Bedroom interior"
@@ -604,7 +705,7 @@ function LuxuryLiving() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="img-mask aspect-[3/4] mt-16 overflow-hidden bg-sand">
+            <div className="img-mask plot-frame aspect-[3/4] mt-16 overflow-hidden bg-sand">
               <img
                 src={img("6315804")}
                 alt="Kitchen interior"
@@ -661,7 +762,7 @@ function Developments() {
                 i % 2 === 1 ? "md:[&>:first-child]:order-2" : ""
               }`}
             >
-              <div className="img-mask md:col-span-7 aspect-[3/2] overflow-hidden bg-sand">
+              <div className="img-mask plot-frame md:col-span-7 aspect-[3/2] overflow-hidden bg-sand">
                 <img
                   src={d.image}
                   alt={d.name}
@@ -780,7 +881,7 @@ function Neighbourhoods() {
         <div className="mt-20 grid grid-cols-1 gap-x-6 gap-y-16 md:grid-cols-2 md:gap-y-24 lg:grid-cols-4">
           {NEIGHBOURHOODS.map((n, i) => (
             <div key={n.name} className={i % 2 === 1 ? "lg:mt-20" : ""}>
-              <div className="img-mask aspect-[3/4] overflow-hidden bg-sand">
+              <div className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
                 <img
                   src={n.image}
                   alt={n.name}
@@ -978,6 +1079,8 @@ function Contact() {
         />
       </div>
       <div className="absolute inset-0 bg-warm-black/70" />
+      <PlotLinework className="absolute -bottom-16 -right-16 z-[1] h-[420px] w-[420px] text-ivory/25 md:h-[520px] md:w-[520px]" />
+      <RegisterMark className="absolute left-6 top-6 z-10 hidden text-ivory/40 md:block" />
 
       <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 gap-16 px-6 py-28 md:grid-cols-12 md:gap-12 md:px-10 md:py-40">
         <div className="md:col-span-5">
@@ -1084,7 +1187,17 @@ function Footer() {
       <div className="mx-auto max-w-[1440px] px-6 pt-28 pb-16 md:px-10 md:pt-40">
         <div className="grid grid-cols-1 gap-16 md:grid-cols-12 md:gap-12">
           <div className="md:col-span-5">
-            <p className="font-serif text-4xl tracking-[0.28em] md:text-5xl">AUREVA</p>
+            <div className="flex items-center gap-3">
+              <p className="font-serif text-4xl tracking-[0.28em] md:text-5xl">AUREVA</p>
+              <svg aria-hidden viewBox="0 0 24 24" className="mt-1 h-4 w-4 text-gold" opacity={0.7}>
+                <g fill="none" stroke="currentColor" strokeWidth="1">
+                  <line x1="4" y1="4" x2="4" y2="10" />
+                  <line x1="4" y1="4" x2="10" y2="4" />
+                  <line x1="20" y1="20" x2="20" y2="14" />
+                  <line x1="20" y1="20" x2="14" y2="20" />
+                </g>
+              </svg>
+            </div>
             <p className="mt-6 max-w-sm text-[14px] leading-relaxed text-muted-ink">
               A private practice representing residences of consequence across
               Lagos. Established Ikoyi, 2014.
@@ -1140,7 +1253,7 @@ function RovocheFooterSignature() {
         <div className="py-20 text-center md:py-28">
           <p className="font-serif text-4xl leading-[1.1] tracking-[-0.01em] text-warm-black md:text-6xl">
             Built on Rock.{" "}
-            <span className="italic font-light text-charcoal/80">Crafted to Last.</span>
+            <span className="survey-mark font-light">Crafted to Last.</span>
           </p>
           <p className="mt-10 text-[13px] uppercase tracking-[0.32em] text-muted-ink">
             —{" "}
