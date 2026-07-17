@@ -1,275 +1,1350 @@
-@import "tailwindcss" source(none);
-@source "../src";
-@import "tw-animate-css";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type SyntheticEvent } from "react";
 
-@custom-variant dark (&:is(.dark *));
+export const Route = createFileRoute("/")({
+  component: AurevaHome,
+});
 
-@theme inline {
-  --font-serif: "Fraunces", "Iowan Old Style", serif;
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+// --- Media -----------------------------------------------------------------
 
-  --color-ivory: var(--ivory);
-  --color-stone-warm: var(--stone-warm);
-  --color-sand: var(--sand);
-  --color-charcoal: var(--charcoal);
-  --color-warm-black: var(--warm-black);
-  --color-gold: var(--gold);
-  --color-gold-soft: var(--gold-soft);
-  --color-muted-ink: var(--muted-ink);
-  --color-hairline: var(--hairline);
+const HERO_VIDEO =
+  "https://videos.pexels.com/video-files/26078870/11929967_3840_2160_30fps.mp4";
+const AERIAL_VIDEO =
+  "https://videos.pexels.com/video-files/33125178/14118651_2160_3840_30fps.mp4";
+const INTERIOR_WALK =
+  "https://videos.pexels.com/video-files/7578552/7578552-uhd_3840_2160_30fps.mp4";
+const BEDROOM_VIDEO =
+  "https://videos.pexels.com/video-files/29466040/12684301_1920_1080_60fps.mp4";
+const LIVING_VIDEO =
+  "https://videos.pexels.com/video-files/18531410/18531410-uhd_3840_2160_60fps.mp4";
 
-  --color-background: var(--ivory);
-  --color-foreground: var(--charcoal);
-  --color-border: var(--hairline);
-  --color-ring: var(--gold);
-  --color-primary: var(--charcoal);
-  --color-primary-foreground: var(--ivory);
-  --color-muted: var(--stone-warm);
-  --color-muted-foreground: var(--muted-ink);
-  --color-accent: var(--gold);
-  --color-accent-foreground: var(--ivory);
-  --color-card: var(--ivory);
-  --color-card-foreground: var(--charcoal);
-  --color-popover: var(--ivory);
-  --color-popover-foreground: var(--charcoal);
-  --color-secondary: var(--stone-warm);
-  --color-secondary-foreground: var(--charcoal);
-  --color-destructive: oklch(0.55 0.18 25);
-  --color-destructive-foreground: var(--ivory);
-  --color-input: var(--hairline);
-}
+const img = (id: string, w = 1600) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
 
-:root {
-  --radius: 0.125rem;
+// Fallback used when a hotlinked Pexels image 404s or times out, so a dead
+// link degrades to a tasteful placeholder tile instead of a blank white box.
+const IMG_FALLBACK =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#d9cfc0"/>
+          <stop offset="1" stop-color="#efe8db"/>
+        </linearGradient>
+      </defs>
+      <rect width="800" height="800" fill="url(#g)"/>
+    </svg>`
+  );
 
-  /* True near-white/near-black monochrome base — the rust accent below is the
-     only saturated colour anywhere in the system, deliberately, following
-     the restrained-palette pattern used by Compass (black/white, photography
-     as the only visual accent) and the LVMH-house convention of one metal
-     against monochrome rather than a "warm luxury cream" board. */
-  --ivory: oklch(0.97 0.004 90);
-  --stone-warm: oklch(0.93 0.005 88);
-  --sand: oklch(0.88 0.007 85);
-  --charcoal: oklch(0.26 0.008 265);
-  --warm-black: oklch(0.13 0.01 265);
-  /* Laterite rust — Lagos red-earth/brick, deliberately darker & more saturated than
-     a gold/terracotta accent so it reads as mineral, not decorative */
-  --gold: oklch(0.46 0.135 40);
-  --gold-soft: oklch(0.62 0.1 45);
-  --muted-ink: oklch(0.48 0.006 265);
-  --hairline: oklch(0.83 0.006 85);
-}
+const handleImgError = (e: SyntheticEvent<HTMLImageElement>) => {
+  const el = e.currentTarget;
+  if (el.src !== IMG_FALLBACK) el.src = IMG_FALLBACK;
+};
 
-@layer base {
-  * {
-    border-color: var(--color-hairline);
-  }
+const handleVideoError = (e: SyntheticEvent<HTMLVideoElement>) => {
+  // Hide a video that fails to load/play (e.g. hotlink dead or blocked)
+  // rather than leaving an empty black/white frame in its place.
+  e.currentTarget.style.display = "none";
+};
 
-  html {
-    scroll-behavior: smooth;
-    background-color: var(--ivory);
-  }
+// --- Signature motif ---------------------------------------------------
+// A drawn aerial plot boundary — the one recurring graphic device tying the
+// whole site to its actual subject (surveyed land, not generic "luxury").
+// pathLength="1" normalises every shape so the CSS draw-in transition
+// (.plot-draw, in styles.css) works the same regardless of geometry.
 
-  body {
-    background-color: var(--ivory);
-    color: var(--charcoal);
-    font-family: var(--font-sans);
-    font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-
-  h1, h2, h3, h4 {
-    font-family: var(--font-serif);
-    font-weight: 420;
-    letter-spacing: -0.01em;
-    color: var(--warm-black);
-    font-optical-sizing: auto;
-  }
-
-  ::selection {
-    background: var(--gold);
-    color: var(--ivory);
-  }
-}
-
-/* A survey/plot annotation, not a decorative kicker: small mono tag with a
-   leading tick, used only where the label carries real information (a
-   status, a place, a reference) — cut anywhere it just restates the heading. */
-@utility eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: var(--gold);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  &::before {
-    content: "";
-    display: inline-block;
-    width: 1.1em;
-    height: 1px;
-    background: currentColor;
-  }
+function PlotLinework({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 640 640"
+      className={`plot-draw pointer-events-none ${className}`}
+      aria-hidden="true"
+    >
+      <polygon
+        className="plot-mark"
+        pathLength="1"
+        points="96,540 74,268 210,84 452,58 566,204 522,430 388,566 168,584"
+      />
+      <polygon
+        className="plot-mark"
+        pathLength="1"
+        points="210,420 198,286 300,196 404,214 396,368 300,452"
+        opacity="0.6"
+      />
+      <line className="plot-mark" pathLength="1" x1="74" y1="268" x2="566" y2="204" opacity="0.35" />
+      <line className="plot-mark" pathLength="1" x1="96" y1="540" x2="522" y2="430" opacity="0.35" />
+      <g className="plot-mark" pathLength="1" opacity="0.8">
+        <circle cx="566" cy="96" r="34" />
+        <line x1="566" y1="66" x2="566" y2="126" />
+        <line x1="536" y1="96" x2="596" y2="96" />
+      </g>
+      <text
+        x="566"
+        y="150"
+        textAnchor="middle"
+        fill="currentColor"
+        style={{ font: "500 11px var(--font-mono)", letterSpacing: "0.03em" }}
+      >
+        N
+      </text>
+      <text
+        x="96"
+        y="562"
+        fill="currentColor"
+        style={{ font: "400 10px var(--font-mono)", letterSpacing: "0.02em" }}
+      >
+        PLOT 14B · 2,450 M²
+      </text>
+    </svg>
+  );
 }
 
-@utility hairline {
-  height: 1px;
-  background: var(--hairline);
-  width: 100%;
+function RegisterMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={`plot-mark h-4 w-4 ${className}`} aria-hidden="true">
+      <line x1="12" y1="0" x2="12" y2="24" />
+      <line x1="0" y1="12" x2="24" y2="12" />
+      <circle cx="12" cy="12" r="6" />
+    </svg>
+  );
 }
 
-@utility gold-line {
-  height: 1px;
-  background: var(--gold);
-  opacity: 0.55;
+// --- Data ------------------------------------------------------------------
+
+type Property = {
+  name: string;
+  location: string;
+  beds: number;
+  baths: number;
+  sqm: number;
+  price: string;
+  copy: string;
+  image: string;
+};
+
+const PROPERTIES: Property[] = [
+  {
+    name: "Maison Osborne",
+    location: "Osborne Foreshore, Ikoyi",
+    beds: 5,
+    baths: 6,
+    sqm: 720,
+    price: "₦1.85B",
+    copy: "A private waterfront residence on the Lagoon's quieter reach, with a floating stair in Iroko and a west-facing pool.",
+    image: img("31032367"),
+  },
+  {
+    name: "The Banana Residence",
+    location: "Banana Island",
+    beds: 6,
+    baths: 8,
+    sqm: 980,
+    price: "₦3.20B",
+    copy: "A gated compound arranged around a courtyard garden, with staff quarters, cinema and a 22-metre lap pool.",
+    image: img("17174767"),
+  },
+  {
+    name: "Villa Cordelia",
+    location: "Parkview, Ikoyi",
+    beds: 4,
+    baths: 5,
+    sqm: 610,
+    price: "₦1.10B",
+    copy: "A low-slung modernist villa framed by mature palms, with a walled kitchen garden and detached studio.",
+    image: img("4878949"),
+  },
+  {
+    name: "Sky House N19",
+    location: "Eko Atlantic, Victoria Island",
+    beds: 3,
+    baths: 4,
+    sqm: 340,
+    price: "₦780M",
+    copy: "A full-floor penthouse on the nineteenth level, wrapped in floor-to-ceiling glass with an Atlantic prospect.",
+    image: img("31496836"),
+  },
+  {
+    name: "The Milverton",
+    location: "Old Ikoyi",
+    beds: 5,
+    baths: 6,
+    sqm: 690,
+    price: "₦1.45B",
+    copy: "A restored 1960s residence reworked with a limestone loggia, guest pavilion and a fifty-metre allée of frangipani.",
+    image: img("37253217"),
+  },
+  {
+    name: "Palm Reach 07",
+    location: "Lekki Peninsula",
+    beds: 4,
+    baths: 5,
+    sqm: 520,
+    price: "₦620M",
+    copy: "A beach-side pavilion residence with an outdoor kitchen, plunge pool, and a private walk to the shoreline.",
+    image: img("19219055"),
+  },
+];
+
+type Development = {
+  name: string;
+  place: string;
+  status: string;
+  copy: string;
+  image: string;
+};
+
+const DEVELOPMENTS: Development[] = [
+  {
+    name: "The Osborne Reserve",
+    place: "Osborne Foreshore II",
+    status: "Under construction — Q3 2027",
+    copy: "Twelve waterfront residences, each with a private mooring and a landscaped roof terrace by Studio Awele.",
+    image: img("30808686"),
+  },
+  {
+    name: "Ilashe Sands",
+    place: "Ilashe Island",
+    status: "Reservations open",
+    copy: "A collection of nine beach houses arranged along a private stretch of Atlantic coast, half an hour by boat.",
+    image: img("30808684"),
+  },
+  {
+    name: "Marina House",
+    place: "Eko Atlantic",
+    status: "Selling — Phase II",
+    copy: "A twenty-two storey residential tower shaped by the ocean wind, with a member's lounge on the twentieth floor.",
+    image: img("27822509"),
+  },
+];
+
+type Neighbourhood = {
+  name: string;
+  note: string;
+  copy: string;
+  image: string;
+  fromVI: string;
+};
+
+const NEIGHBOURHOODS: Neighbourhood[] = [
+  {
+    name: "Ikoyi",
+    note: "Old Lagos, quietly reworked",
+    copy: "Broad, tree-lined streets, walled compounds and a rhythm that has remained largely undisturbed for six decades.",
+    image: img("12039376"),
+    fromVI: "10 MIN FROM VI",
+  },
+  {
+    name: "Banana Island",
+    note: "The private address",
+    copy: "A single causeway, one gate, and the highest concentration of purpose-built residences in West Africa.",
+    image: img("37921899"),
+    fromVI: "15 MIN FROM VI",
+  },
+  {
+    name: "Eko Atlantic",
+    note: "New land, considered",
+    copy: "Ten square kilometres reclaimed from the sea, master-planned block by block, with the ocean on three sides.",
+    image: img("19219055"),
+    fromVI: "5 MIN FROM VI",
+  },
+  {
+    name: "Lekki Peninsula",
+    note: "Where the city meets the coast",
+    copy: "A slower shoreline of gated estates, garden restaurants and long stretches of quiet, uninterrupted beach.",
+    image: img("4878949"),
+    fromVI: "30 MIN FROM VI",
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    quote:
+      "They understood, before we did, that we were not buying a house. We were buying a way of arriving home.",
+    name: "Adaeze O.",
+    role: "Client, Ikoyi residence",
+  },
+  {
+    quote:
+      "The process was unhurried and exact. Six months later, I am still finding details in the house that were quietly considered on our behalf.",
+    name: "Tunde A.",
+    role: "Client, Banana Island",
+  },
+  {
+    quote:
+      "For a foreign buyer, discretion mattered more than anything. Aureva were the only firm in Lagos who understood that in the first meeting.",
+    name: "M. Laurent",
+    role: "Private client, Paris",
+  },
+];
+
+const FAQ = [
+  {
+    q: "Do you represent buyers who are not based in Lagos?",
+    a: "Yes. A significant portion of our clients live abroad. We conduct viewings on their behalf, prepare condition reports and coordinate every step of the acquisition remotely, from first visit to handover.",
+  },
+  {
+    q: "Are your listings publicly advertised?",
+    a: "Some are. A considerable number of the residences we transact are held privately and shown by introduction only. If you are searching for a specific address, please write to us.",
+  },
+  {
+    q: "How do you value a property?",
+    a: "Each residence is assessed on its own terms — location, provenance, build quality, land tenure and comparable sales. We do not publish price-per-square-metre figures; we believe they flatten a considered market.",
+  },
+  {
+    q: "Do you assist with residency and structuring for foreign buyers?",
+    a: "We work alongside a small group of trusted lawyers and tax advisers in Lagos, London and Dubai. We are happy to make an introduction when the moment is right.",
+  },
+  {
+    q: "What is your fee structure?",
+    a: "Our fees are transparent and agreed in writing before any engagement begins. We do not accept referral fees from developers, so the counsel you receive is entirely our own.",
+  },
+];
+
+// --- Reveal hook -----------------------------------------------------------
+
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal, .img-mask, .plot-draw");
+
+    // Safety net: if anything is still hidden after 1.2s (slow hydration,
+    // an observer that never fires, fast scroll past threshold, etc.),
+    // force it visible. Better a missed animation than a permanently
+    // blank photo.
+    const forceReveal = () => {
+      els.forEach((el) => el.classList.add("is-visible"));
+    };
+
+    if (typeof IntersectionObserver === "undefined") {
+      forceReveal();
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -60px 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+
+    const safetyTimer = window.setTimeout(forceReveal, 1200);
+
+    return () => {
+      io.disconnect();
+      window.clearTimeout(safetyTimer);
+    };
+  }, []);
 }
 
-@utility plot-tag {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.01em;
-  color: var(--muted-ink);
+// --- Page ------------------------------------------------------------------
+
+function AurevaHome() {
+  useReveal();
+  return (
+    <div className="bg-ivory text-charcoal font-sans">
+      <Nav />
+      <Hero />
+      <About />
+      <FeaturedProperties />
+      <LuxuryLiving />
+      <Developments />
+      <Investment />
+      <Neighbourhoods />
+      <WhyAureva />
+      <Testimonials />
+      <Faq />
+      <Contact />
+      <Footer />
+      <RovocheFooterSignature />
+      <FloatingPill />
+    </div>
+  );
 }
 
-@utility link-underline {
-  position: relative;
-  display: inline-block;
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -2px;
-    height: 1px;
-    width: 100%;
-    background: currentColor;
-    transform-origin: right;
-    transform: scaleX(1);
-    transition: transform 0.6s cubic-bezier(0.7, 0, 0.2, 1);
-  }
-  &:hover::after {
-    transform-origin: left;
-    transform: scaleX(0);
-  }
+// --- Nav -------------------------------------------------------------------
+
+function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <header
+      className={`fixed inset-x-0 top-0 z-40 transition-[background,backdrop-filter,border-color,color] duration-500 ${
+        scrolled
+          ? "bg-ivory/85 backdrop-blur-md border-b border-hairline"
+          : "bg-transparent border-b border-transparent"
+      }`}
+    >
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-5 md:px-10 md:py-6">
+        <a
+          href="#top"
+          className={`font-serif text-xl tracking-[0.32em] ${
+            scrolled ? "text-warm-black" : "text-ivory mix-blend-difference"
+          }`}
+        >
+          AUREVA
+        </a>
+        <nav
+          className={`hidden gap-9 text-[11px] font-medium uppercase tracking-[0.22em] md:flex ${
+            scrolled ? "text-charcoal" : "text-ivory mix-blend-difference"
+          }`}
+        >
+          <a href="#properties" className="link-underline">Properties</a>
+          <a href="#living" className="link-underline">Living</a>
+          <a href="#developments" className="link-underline">Developments</a>
+          <a href="#neighbourhoods" className="link-underline">Neighbourhoods</a>
+          <a href="#contact" className="link-underline">Contact</a>
+        </nav>
+        <a
+          href="#contact"
+          className={`hidden text-[11px] font-medium uppercase tracking-[0.22em] md:inline-flex md:items-center md:gap-2 ${
+            scrolled ? "text-warm-black" : "text-ivory mix-blend-difference"
+          }`}
+        >
+          <span>Private Enquiry</span>
+          <span aria-hidden>→</span>
+        </a>
+      </div>
+    </header>
+  );
 }
 
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes pill-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes ken-burns {
-  from { transform: scale(1.02); }
-  to { transform: scale(1.12); }
+// --- Hero ------------------------------------------------------------------
+
+function Hero() {
+  return (
+    <section id="top" className="relative h-[100svh] w-full overflow-hidden bg-warm-black">
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        src={HERO_VIDEO}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onError={handleVideoError}
+        poster={img("31032367", 1920)}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(10,12,18,0.38) 0%, rgba(10,12,18,0) 18%, rgba(10,12,18,0) 55%, rgba(10,12,18,0.5) 100%)",
+        }}
+      />
+
+      {/* Signature: an abstracted survey drawing of a reclaimed Lagos
+          waterfront parcel — the site's one graphic idea, kept quiet
+          enough to sit behind the headline rather than compete with it. */}
+      <svg
+        aria-hidden
+        viewBox="0 0 1600 900"
+        preserveAspectRatio="xMidYMid slice"
+        className="pointer-events-none absolute inset-0 z-[5] h-full w-full"
+      >
+        <g fill="none" stroke="var(--ivory)" strokeWidth="1" opacity="0.22">
+          <path d="M -20 640 C 220 560, 360 610, 520 540 S 780 460, 940 500 S 1180 420, 1360 470 L 1620 430" />
+          <path d="M -20 700 C 240 630, 400 670, 560 610 S 800 540, 980 570 S 1200 500, 1400 540 L 1620 500" strokeDasharray="2 7" />
+        </g>
+        <g fill="none" stroke="var(--gold-soft)" strokeWidth="1" opacity="0.55">
+          <polygon points="1120,330 1320,300 1360,430 1180,470" />
+          <line x1="1120" y1="330" x2="1320" y2="300" strokeDasharray="4 5" opacity="0.5" />
+        </g>
+        {[
+          [1120, 330], [1320, 300], [1360, 430], [1180, 470],
+        ].map(([cx, cy]) => (
+          <g key={`${cx}-${cy}`} stroke="var(--gold-soft)" opacity="0.6">
+            <line x1={cx - 6} y1={cy} x2={cx + 6} y2={cy} />
+            <line x1={cx} y1={cy - 6} x2={cx} y2={cy + 6} />
+          </g>
+        ))}
+        <text x="1132" y="386" fontFamily="var(--font-mono)" fontSize="11" fill="var(--gold-soft)" opacity="0.75">
+          LOT 07A — 0.42 HA
+        </text>
+        <g stroke="var(--ivory)" opacity="0.3">
+          <line x1="90" y1="120" x2="90" y2="168" />
+          <line x1="72" y1="120" x2="108" y2="120" />
+        </g>
+        <text x="80" y="192" fontFamily="var(--font-mono)" fontSize="11" fill="var(--ivory)" opacity="0.4">
+          N
+        </text>
+      </svg>
+
+      <div className="relative z-10 flex h-full flex-col justify-between px-6 py-28 md:px-12 md:py-32">
+        <div />
+        <div className="max-w-4xl">
+          <h1 className="font-serif text-[13vw] leading-[0.95] tracking-[-0.02em] text-ivory md:text-[7.2vw]">
+            Exceptional Homes.
+            <br />
+            <span className="survey-mark font-light">Extraordinary Living.</span>
+          </h1>
+        </div>
+
+        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-md">
+            <p className="text-[13px] leading-relaxed text-ivory/80 md:text-sm">
+              A private practice representing waterfront residences, penthouses and heritage
+              villas across Lagos — introduced quietly, transacted with care.
+            </p>
+            <p className="mt-5 font-mono text-[11px] tracking-[0.01em] text-ivory/55">
+              ₦40B+ REPRESENTED · 60+ QUIET TRANSACTIONS · SINCE 2014
+            </p>
+          </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <a
+              href="#properties"
+              className="group inline-flex items-center justify-between gap-6 border border-ivory/60 px-7 py-4 text-[11px] font-medium uppercase tracking-[0.22em] text-ivory transition-colors hover:bg-ivory hover:text-warm-black"
+            >
+              <span>View the Collection</span>
+              <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+            </a>
+            <a
+              href="#contact"
+              className="text-[11px] font-medium uppercase tracking-[0.22em] text-ivory/80 link-underline"
+            >
+              Arrange a Viewing
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <RegisterMark className="absolute left-6 top-6 z-10 hidden text-ivory/50 md:block" />
+      <RegisterMark className="absolute right-6 top-6 z-10 hidden text-ivory/50 md:block" />
+      <div className="absolute bottom-6 left-6 z-10 hidden font-mono text-[10px] tracking-[0.02em] text-ivory/60 md:block">
+        6.4531°N 3.4197°E — LAGOS
+      </div>
+      <div className="absolute bottom-6 right-6 z-10 hidden font-mono text-[10px] tracking-[0.02em] text-ivory/60 md:block">
+        ↓ SCROLL
+      </div>
+    </section>
+  );
 }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 1.1s cubic-bezier(0.2, 0.7, 0.2, 1), transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+// --- About -----------------------------------------------------------------
+
+function About() {
+  return (
+    <section className="relative border-b border-hairline bg-ivory">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-16 px-6 py-28 md:grid-cols-12 md:gap-12 md:px-10 md:py-40">
+        <div className="md:col-span-4">
+          <p className="eyebrow reveal">A Private Practice</p>
+          <div className="gold-line mt-6 w-16" />
+        </div>
+        <div className="md:col-span-8">
+          <h2 className="reveal max-w-3xl font-serif text-4xl leading-[1.05] tracking-[-0.01em] md:text-[3.75rem]">
+            We do not sell houses. We introduce a very small number of people
+            to the residences that will shape the next chapter of their lives.
+          </h2>
+          <div className="mt-14 grid gap-10 md:grid-cols-2 md:gap-16">
+            <p className="reveal text-[15px] leading-[1.85] text-charcoal/85">
+              Founded in Ikoyi in 2014, AUREVA represents a considered portfolio of
+              waterfront residences, heritage villas and full-floor penthouses across
+              Lagos. Our work sits at the intersection of architecture, provenance and
+              private counsel.
+            </p>
+            <p className="reveal text-[15px] leading-[1.85] text-charcoal/85">
+              A significant part of our practice is never advertised. Introductions
+              are made in person, correspondence is discreet, and every viewing is
+              accompanied. We prefer to work with fewer clients, and with more time.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
-.img-mask {
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path 1.4s cubic-bezier(0.7, 0, 0.15, 1);
-}
-.img-mask.is-visible {
-  clip-path: inset(0 0 0 0);
+// --- Featured properties ---------------------------------------------------
+
+function FeaturedProperties() {
+  return (
+    <section id="properties" className="relative border-b border-hairline bg-stone-warm">
+      <div className="mx-auto max-w-[1440px] px-6 pt-28 pb-16 md:px-10 md:pt-40">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="eyebrow reveal">The Collection · 2026</p>
+            <h2 className="reveal mt-6 max-w-2xl font-serif text-4xl leading-[1.05] md:text-6xl">
+              Six residences, quietly on the market.
+            </h2>
+          </div>
+          <p className="reveal max-w-sm text-[14px] leading-relaxed text-charcoal/75">
+            A cross-section of what we are currently representing across Ikoyi,
+            Banana Island, Eko Atlantic and the Lekki Peninsula. A further
+            portfolio is available privately.
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1440px] px-6 pb-28 md:px-10 md:pb-40">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 md:gap-y-28">
+          {PROPERTIES.map((p, i) => (
+            <PropertyCard key={p.name} property={p} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
-.plot-draw path,
-.plot-draw polygon,
-.plot-draw line,
-.plot-draw circle {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset 2.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.plot-draw text {
-  opacity: 0;
-  transition: opacity 1s ease 1.6s;
-}
-.plot-draw.is-visible path,
-.plot-draw.is-visible polygon,
-.plot-draw.is-visible line,
-.plot-draw.is-visible circle {
-  stroke-dashoffset: 0;
-}
-.plot-draw.is-visible text {
-  opacity: 1;
-}
-
-/* Signature emphasis device: a benchmark tick + baseline under a phrase,
-   standing in for the italic-plus-colour-word headline formula. No italic,
-   no coloured text — the emphasis is a drawn line, not a font swap. */
-.survey-mark {
-  position: relative;
-  display: inline-block;
-  font-style: normal;
-}
-.survey-mark::before {
-  content: "+";
-  position: absolute;
-  left: -0.9em;
-  top: 0.12em;
-  font-family: var(--font-mono);
-  font-size: 0.42em;
-  color: var(--gold);
-}
-.survey-mark::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0.08em;
-  height: 1px;
-  background: var(--gold);
-  opacity: 0.75;
+function PropertyCard({ property, index }: { property: Property; index: number }) {
+  const offset = index % 2 === 1 ? "md:mt-24" : "";
+  return (
+    <article className={`group ${offset}`}>
+      <div className="img-mask plot-frame relative aspect-[4/5] w-full overflow-hidden bg-sand">
+        <img
+          src={property.image}
+          alt={property.name}
+          loading="lazy"
+          onError={handleImgError}
+          className="h-full w-full object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-[1.04]"
+        />
+      </div>
+      <div className="reveal mt-8 flex items-start justify-between gap-6">
+        <div>
+          <p className="font-mono text-[11px] tracking-[0.01em] text-muted-ink">
+            {property.location}
+          </p>
+          <h3 className="mt-3 font-serif text-2xl leading-tight md:text-[2rem]">
+            {property.name}
+          </h3>
+        </div>
+        <div className="text-right">
+          <p className="font-mono text-[11px] tracking-[0.01em] text-gold">GUIDE</p>
+          <p className="mt-3 font-serif text-xl md:text-2xl">{property.price}</p>
+        </div>
+      </div>
+      <p className="reveal mt-5 max-w-md text-[14px] leading-[1.8] text-charcoal/80">
+        {property.copy}
+      </p>
+      <div className="reveal mt-6 flex items-center gap-6 font-mono text-[11px] tracking-[0.01em] text-muted-ink">
+        <span>{property.beds} BED</span>
+        <span className="h-3 w-px bg-hairline" />
+        <span>{property.baths} BATH</span>
+        <span className="h-3 w-px bg-hairline" />
+        <span>{property.sqm} M²</span>
+      </div>
+      <a
+        href="#contact"
+        className="reveal mt-8 inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.22em] text-warm-black"
+      >
+        <span className="link-underline">View Residence</span>
+        <span aria-hidden>→</span>
+      </a>
+    </article>
+  );
 }
 
-/* Signature device #1: drafting registration marks at each corner of a
-   photo frame — quiet, consistent, applied everywhere a photo appears.
-   Pure background-image corner brackets, so it animates with img-mask
-   without needing extra DOM nodes. */
-.plot-frame {
-  position: relative;
-  background-image:
-    linear-gradient(to right, var(--gold) 1.5px, transparent 1.5px),
-    linear-gradient(to bottom, var(--gold) 1.5px, transparent 1.5px),
-    linear-gradient(to left, var(--gold) 1.5px, transparent 1.5px),
-    linear-gradient(to bottom, var(--gold) 1.5px, transparent 1.5px),
-    linear-gradient(to right, var(--gold) 1.5px, transparent 1.5px),
-    linear-gradient(to top, var(--gold) 1.5px, transparent 1.5px),
-    linear-gradient(to left, var(--gold) 1.5px, transparent 1.5px),
-    linear-gradient(to top, var(--gold) 1.5px, transparent 1.5px);
-  background-repeat: no-repeat;
-  background-size: 20px 20px;
-  background-position:
-    top -1px left -1px, top -1px left -1px,
-    top -1px right -1px, top -1px right -1px,
-    bottom -1px right -1px, bottom -1px right -1px,
-    bottom -1px left -1px, bottom -1px left -1px;
+// --- Luxury Living ---------------------------------------------------------
+
+function LuxuryLiving() {
+  return (
+    <section id="living" className="relative bg-ivory">
+      <div className="relative h-[70svh] w-full overflow-hidden md:h-[92svh]">
+        <video
+          className="h-full w-full object-cover"
+          src={LIVING_VIDEO}
+          poster={img("6957094", 1920)}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        onError={handleVideoError}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(10,12,18,0) 50%, rgba(10,12,18,0.55) 100%)",
+          }}
+        />
+        <div className="absolute inset-x-0 bottom-0 p-6 md:p-14">
+          <p className="eyebrow text-ivory/70">A Way of Living</p>
+          <h2 className="mt-4 max-w-3xl font-serif text-4xl leading-[1.02] text-ivory md:text-7xl">
+            The <span className="survey-mark font-light">quiet hours</span> are the
+            ones we design for.
+          </h2>
+        </div>
+      </div>
+
+      <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-6 py-24 md:grid-cols-12 md:gap-8 md:px-10 md:py-40">
+        <div className="md:col-span-5">
+          <div className="img-mask plot-frame aspect-[4/5] overflow-hidden bg-sand">
+            <img
+              src={img("6957094")}
+              alt="A quiet Lagos interior"
+              loading="lazy"
+          onError={handleImgError}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <p className="reveal mt-6 max-w-sm text-[13px] leading-relaxed text-muted-ink">
+            A drawing room in an Ikoyi residence. Late afternoon, no direction to look.
+          </p>
+        </div>
+
+        <div className="md:col-span-6 md:col-start-7 md:pt-24">
+          <p className="eyebrow reveal">On Interiors</p>
+          <h3 className="reveal mt-6 font-serif text-3xl leading-[1.1] md:text-5xl">
+            A house is a private argument for how you spend your days.
+          </h3>
+          <p className="reveal mt-8 max-w-lg text-[15px] leading-[1.9] text-charcoal/85">
+            We work with a small circle of architects, interior designers and
+            landscape practices whose work has quietly shaped Lagos over the
+            past decade. When it makes sense, we introduce them. When it
+            doesn't, we say so.
+          </p>
+
+          <div className="reveal mt-14 grid grid-cols-2 gap-8">
+            <div className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
+              <img
+                src={img("6663039")}
+                alt="Bedroom interior"
+                loading="lazy"
+          onError={handleImgError}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="img-mask plot-frame aspect-[3/4] mt-16 overflow-hidden bg-sand">
+              <img
+                src={img("6315804")}
+                alt="Kitchen interior"
+                loading="lazy"
+          onError={handleImgError}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative aspect-[16/9] w-full overflow-hidden">
+        <video
+          className="h-full w-full object-cover"
+          src={INTERIOR_WALK}
+          poster={img("6663039", 1920)}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        onError={handleVideoError}
+        />
+      </div>
+    </section>
+  );
 }
 
-/* Signature motif: a plot-boundary line drawing, used in the hero and footer.
-   Kept to hairline strokes so it reads as drafting linework, not illustration. */
-.plot-mark {
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
+// --- Developments ----------------------------------------------------------
+
+function Developments() {
+  return (
+    <section id="developments" className="border-y border-hairline bg-ivory">
+      <div className="mx-auto max-w-[1440px] px-6 py-28 md:px-10 md:py-40">
+        <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
+          <div>
+            <p className="eyebrow reveal">Developments</p>
+            <h2 className="reveal mt-6 max-w-2xl font-serif text-4xl leading-[1.05] md:text-6xl">
+              Three projects, currently in build.
+            </h2>
+          </div>
+          <p className="reveal max-w-sm text-[14px] leading-relaxed text-charcoal/75">
+            We represent a limited number of developments — each chosen for its
+            architect, its site, and the discipline of its plans.
+          </p>
+        </div>
+
+        <div className="mt-20 space-y-24 md:mt-28 md:space-y-32">
+          {DEVELOPMENTS.map((d, i) => (
+            <div
+              key={d.name}
+              className={`grid grid-cols-1 items-center gap-10 md:grid-cols-12 md:gap-14 ${
+                i % 2 === 1 ? "md:[&>:first-child]:order-2" : ""
+              }`}
+            >
+              <div className="img-mask plot-frame md:col-span-7 aspect-[3/2] overflow-hidden bg-sand">
+                <img
+                  src={d.image}
+                  alt={d.name}
+                  loading="lazy"
+          onError={handleImgError}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="md:col-span-5">
+                <p className="eyebrow reveal">{d.status}</p>
+                <h3 className="reveal mt-5 font-serif text-3xl leading-[1.05] md:text-5xl">
+                  {d.name}
+                </h3>
+                <p className="reveal mt-3 text-[13px] uppercase tracking-[0.22em] text-muted-ink">
+                  {d.place}
+                </p>
+                <p className="reveal mt-7 max-w-md text-[15px] leading-[1.85] text-charcoal/85">
+                  {d.copy}
+                </p>
+                <a
+                  href="#contact"
+                  className="reveal mt-8 inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.22em] text-warm-black"
+                >
+                  <span className="link-underline">Request the Plans</span>
+                  <span aria-hidden>→</span>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// --- Investment ------------------------------------------------------------
+
+function Investment() {
+  return (
+    <section className="relative overflow-hidden bg-warm-black text-ivory">
+      <div className="absolute inset-0">
+        <video
+          className="h-full w-full object-cover"
+          src={AERIAL_VIDEO}
+          poster={img("8134755", 1920)}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        onError={handleVideoError}
+        />
+      </div>
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(10,12,18,0.72) 0%, rgba(10,12,18,0.35) 42%, rgba(10,12,18,0.15) 100%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-[1440px] px-6 py-28 md:px-10 md:py-40">
+        <p className="eyebrow reveal text-gold-soft">Investment Counsel</p>
+
+        <div className="mt-10 grid grid-cols-1 items-end gap-10 md:grid-cols-12 md:gap-8">
+          <h2 className="reveal font-serif text-[22vw] leading-[0.82] tracking-[-0.03em] text-ivory md:col-span-7 md:text-[10.5vw]">
+            1/3
+          </h2>
+          <p className="reveal max-w-md text-[15px] leading-[1.9] text-ivory/80 md:col-span-5 md:pb-4">
+            of our clients acquire property in Lagos as a long-hold asset. We
+            provide considered counsel on rental yield, currency exposure,
+            tenure and eventual disposition — quietly, and over a longer
+            horizon than most brokers are willing to keep.
+          </p>
+        </div>
+
+        <div className="reveal mt-16 divide-y divide-ivory/15 border-t border-ivory/15 md:mt-24">
+          {[
+            {
+              t: "Waterfront hold",
+              c: "Ikoyi & Banana Island — appreciation led, low turnover.",
+            },
+            {
+              t: "Yielding penthouses",
+              c: "Eko Atlantic & Victoria Island — corporate lets, USD-linked.",
+            },
+            {
+              t: "Land banking",
+              c: "Selected Lekki parcels, held under transparent title.",
+            },
+            {
+              t: "Development co-investment",
+              c: "By invitation, alongside two Lagos-based practices.",
+            },
+          ].map((x) => (
+            <div
+              key={x.t}
+              className="flex flex-col gap-2 py-6 md:flex-row md:items-baseline md:gap-10 md:py-7"
+            >
+              <p className="font-mono text-[11px] tracking-[0.01em] text-gold md:w-64 md:shrink-0">
+                {x.t.toUpperCase()}
+              </p>
+              <p className="max-w-lg text-[14px] leading-relaxed text-ivory/65">{x.c}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// --- Neighbourhoods --------------------------------------------------------
+
+function Neighbourhoods() {
+  return (
+    <section id="neighbourhoods" className="border-b border-hairline bg-ivory">
+      <div className="mx-auto max-w-[1440px] px-6 py-28 md:px-10 md:py-40">
+        <div className="max-w-3xl">
+          <p className="eyebrow reveal">A Guide to Lagos</p>
+          <h2 className="reveal mt-6 font-serif text-4xl leading-[1.05] md:text-6xl">
+            Four addresses, and what it is like to live in them.
+          </h2>
+        </div>
+
+        <div className="mt-20 grid grid-cols-1 gap-x-6 gap-y-16 md:grid-cols-2 md:gap-y-24 lg:grid-cols-4">
+          {NEIGHBOURHOODS.map((n, i) => (
+            <div key={n.name} className={i % 2 === 1 ? "lg:mt-20" : ""}>
+              <div className="img-mask plot-frame aspect-[3/4] overflow-hidden bg-sand">
+                <img
+                  src={n.image}
+                  alt={n.name}
+                  loading="lazy"
+          onError={handleImgError}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <p className="reveal mt-6 font-mono text-[11px] tracking-[0.01em] text-gold">
+                {n.fromVI} · {n.note}
+              </p>
+              <h3 className="reveal mt-3 font-serif text-2xl md:text-3xl">{n.name}</h3>
+              <p className="reveal mt-3 text-[14px] leading-[1.8] text-charcoal/80">
+                {n.copy}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// --- Why Aureva ------------------------------------------------------------
+
+function WhyAureva() {
+  const rows = [
+    {
+      n: "01",
+      t: "Fewer clients, longer relationships.",
+      c: "We take on a limited number of instructions each year. Most of our clients come to us through a personal introduction, and stay with us across more than one residence.",
+    },
+    {
+      n: "02",
+      t: "A private book, always in motion.",
+      c: "A considerable portion of Lagos's finest houses never appear on the open market. Our practice is built to know about them, and to know about them first.",
+    },
+    {
+      n: "03",
+      t: "Independent counsel, transparent fees.",
+      c: "We do not accept referral fees from developers, and we do not double-broker. Our fee is agreed in writing before any work begins, and it does not move.",
+    },
+    {
+      n: "04",
+      t: "Quiet, accompanied viewings.",
+      c: "Every viewing is arranged privately and attended in person. Cameras are put away. Names are not written down. Nothing that isn't yours to keep leaves the house.",
+    },
+  ];
+  return (
+    <section className="border-b border-hairline bg-stone-warm">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-16 px-6 py-28 md:grid-cols-12 md:gap-12 md:px-10 md:py-40">
+        <div className="md:col-span-4">
+          <p className="eyebrow reveal">Why Aureva</p>
+          <h2 className="reveal mt-6 font-serif text-4xl leading-[1.05] md:text-[3.25rem]">
+            Four principles the practice is built upon.
+          </h2>
+          <div className="reveal mt-10 img-mask aspect-[4/5] overflow-hidden bg-sand">
+            <img
+              src={img("8134755")}
+              alt="Architectural detail"
+              loading="lazy"
+          onError={handleImgError}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </div>
+
+        <div className="md:col-span-7 md:col-start-6">
+          <div className="border-t border-hairline">
+            {rows.map((r) => (
+              <div
+                key={r.t}
+                className="reveal border-b border-hairline py-10 md:py-14"
+              >
+                <h3 className="font-serif text-2xl leading-tight md:text-[2rem]">
+                  {r.t}
+                </h3>
+                <p className="mt-4 max-w-xl text-[14px] leading-[1.85] text-charcoal/80">
+                  {r.c}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// --- Testimonials ----------------------------------------------------------
+
+function Testimonials() {
+  return (
+    <section className="border-b border-hairline bg-ivory">
+      <div className="mx-auto max-w-[1440px] px-6 py-28 md:px-10 md:py-40">
+        <p className="eyebrow reveal">In their words</p>
+        <div className="mt-16 grid grid-cols-1 gap-16 md:grid-cols-3 md:gap-10">
+          {TESTIMONIALS.map((t, i) => (
+            <figure key={i} className="reveal">
+              <div className="gold-line mb-8 w-10" />
+              <blockquote className="font-serif text-2xl leading-[1.35] text-warm-black md:text-[1.75rem]">
+                <span className="text-gold">“</span>
+                {t.quote}
+                <span className="text-gold">”</span>
+              </blockquote>
+              <figcaption className="mt-8 text-[11px] uppercase tracking-[0.22em] text-muted-ink">
+                <span className="text-warm-black">{t.name}</span>
+                <span className="mx-2 text-hairline">/</span>
+                <span>{t.role}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// --- FAQ -------------------------------------------------------------------
+
+function Faq() {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <section className="border-b border-hairline bg-ivory">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-16 px-6 py-28 md:grid-cols-12 md:gap-12 md:px-10 md:py-40">
+        <div className="md:col-span-4">
+          <p className="eyebrow reveal">Enquiries</p>
+          <h2 className="reveal mt-6 font-serif text-4xl leading-[1.05] md:text-[3.25rem]">
+            A few things clients ask, before we meet.
+          </h2>
+        </div>
+        <div className="md:col-span-7 md:col-start-6">
+          <div className="border-t border-hairline">
+            {FAQ.map((item, i) => {
+              const isOpen = open === i;
+              return (
+                <div key={item.q} className="reveal border-b border-hairline">
+                  <button
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    className="flex w-full items-start justify-between gap-8 py-8 text-left"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="font-serif text-xl leading-tight text-warm-black md:text-[1.6rem]">
+                      {item.q}
+                    </span>
+                    <span
+                      aria-hidden
+                      className={`mt-2 shrink-0 font-serif text-2xl leading-none text-gold transition-transform duration-500 ${
+                        isOpen ? "rotate-45" : ""
+                      }`}
+                    >
+                      +
+                    </span>
+                  </button>
+                  <div
+                    className="grid overflow-hidden text-[14px] leading-[1.85] text-charcoal/80 transition-[grid-template-rows,padding] duration-500"
+                    style={{ gridTemplateRows: isOpen ? "1fr" : "0fr", paddingBottom: isOpen ? "2rem" : 0 }}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <p className="max-w-2xl">{item.a}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// --- Contact ---------------------------------------------------------------
+
+function Contact() {
+  const [sent, setSent] = useState(false);
+  return (
+    <section id="contact" className="relative overflow-hidden bg-warm-black text-ivory">
+      <div className="absolute inset-0">
+        <video
+          className="h-full w-full object-cover"
+          src={BEDROOM_VIDEO}
+          poster={img("6315804", 1920)}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        onError={handleVideoError}
+        />
+      </div>
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(10,12,18,0.7) 0%, rgba(10,12,18,0.4) 45%, rgba(10,12,18,0.2) 100%)",
+        }}
+      />
+      <PlotLinework className="absolute -bottom-16 -right-16 z-[1] h-[420px] w-[420px] text-ivory/25 md:h-[520px] md:w-[520px]" />
+      <RegisterMark className="absolute left-6 top-6 z-10 hidden text-ivory/40 md:block" />
+
+      <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 gap-16 px-6 py-28 md:grid-cols-12 md:gap-12 md:px-10 md:py-40">
+        <div className="md:col-span-5">
+          <p className="eyebrow reveal text-gold-soft">Begin a Conversation</p>
+          <h2 className="reveal mt-6 font-serif text-4xl leading-[1.02] text-ivory md:text-[4.5rem]">
+            Write to us,
+            <br />
+            <span className="survey-mark font-light">at your leisure.</span>
+          </h2>
+          <div className="reveal mt-14 space-y-8 text-[13px] leading-relaxed text-ivory/70">
+            <div>
+              <p className="eyebrow text-ivory/50">Office</p>
+              <p className="mt-3 font-serif text-lg text-ivory">
+                12 Bourdillon Road
+                <br />
+                Ikoyi, Lagos
+              </p>
+            </div>
+            <div>
+              <p className="eyebrow text-ivory/50">By appointment</p>
+              <p className="mt-3 font-serif text-lg text-ivory">
+                Monday — Friday
+                <br />
+                By prior arrangement
+              </p>
+            </div>
+            <div>
+              <p className="eyebrow text-ivory/50">Direct</p>
+              <p className="mt-3 font-serif text-lg text-ivory">
+                private@aureva.ng
+                <br />
+                +234 1 000 0000
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form
+          className="md:col-span-6 md:col-start-7"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setSent(true);
+          }}
+        >
+          <div className="reveal grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2">
+            <Field label="Your name" name="name" />
+            <Field label="Email" name="email" type="email" />
+            <Field label="Phone (optional)" name="phone" />
+            <Field label="Preferred neighbourhood" name="area" />
+            <div className="md:col-span-2">
+              <Field label="A few lines about what you are looking for" name="note" textarea />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="reveal mt-12 inline-flex items-center gap-6 border border-ivory/50 px-8 py-4 text-[11px] font-medium uppercase tracking-[0.22em] text-ivory transition-colors hover:bg-ivory hover:text-warm-black"
+          >
+            <span>{sent ? "Thank you — we will be in touch" : "Send Privately"}</span>
+            <span aria-hidden>→</span>
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  name,
+  type = "text",
+  textarea = false,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  textarea?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="eyebrow text-ivory/50">{label}</span>
+      {textarea ? (
+        <textarea
+          name={name}
+          rows={4}
+          className="mt-4 w-full resize-none border-b border-ivory/25 bg-transparent pb-3 font-serif text-lg text-ivory outline-none placeholder:text-ivory/30 focus:border-gold"
+        />
+      ) : (
+        <input
+          type={type}
+          name={name}
+          className="mt-4 w-full border-b border-ivory/25 bg-transparent pb-3 font-serif text-lg text-ivory outline-none placeholder:text-ivory/30 focus:border-gold"
+        />
+      )}
+    </label>
+  );
+}
+
+// --- Footer ----------------------------------------------------------------
+
+function Footer() {
+  return (
+    <footer className="bg-ivory">
+      <div className="mx-auto max-w-[1440px] px-6 pt-28 pb-16 md:px-10 md:pt-40">
+        <div className="grid grid-cols-1 gap-16 md:grid-cols-12 md:gap-12">
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-3">
+              <p className="font-serif text-4xl tracking-[0.28em] md:text-5xl">AUREVA</p>
+              <svg aria-hidden viewBox="0 0 24 24" className="mt-1 h-4 w-4 text-gold" opacity={0.7}>
+                <g fill="none" stroke="currentColor" strokeWidth="1">
+                  <line x1="4" y1="4" x2="4" y2="10" />
+                  <line x1="4" y1="4" x2="10" y2="4" />
+                  <line x1="20" y1="20" x2="20" y2="14" />
+                  <line x1="20" y1="20" x2="14" y2="20" />
+                </g>
+              </svg>
+            </div>
+            <p className="mt-6 max-w-sm text-[14px] leading-relaxed text-muted-ink">
+              A private practice representing residences of consequence across
+              Lagos. Established Ikoyi, 2014.
+            </p>
+          </div>
+          <div className="md:col-span-2">
+            <p className="eyebrow">Practice</p>
+            <ul className="mt-6 space-y-3 text-[14px] text-charcoal/85">
+              <li><a className="link-underline" href="#top">About</a></li>
+              <li><a className="link-underline" href="#properties">Properties</a></li>
+              <li><a className="link-underline" href="#developments">Developments</a></li>
+              <li><a className="link-underline" href="#neighbourhoods">Neighbourhoods</a></li>
+            </ul>
+          </div>
+          <div className="md:col-span-2">
+            <p className="eyebrow">Contact</p>
+            <ul className="mt-6 space-y-3 text-[14px] text-charcoal/85">
+              <li>Ikoyi, Lagos</li>
+              <li>private@aureva.ng</li>
+              <li>+234 1 000 0000</li>
+            </ul>
+          </div>
+          <div className="md:col-span-3">
+            <p className="eyebrow">Notes</p>
+            <p className="mt-6 text-[13px] leading-relaxed text-muted-ink">
+              AUREVA is a Real Estate Consultancy licensed under the Federal
+              Republic of Nigeria. Privacy is maintained as a matter of practice,
+              not of policy.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-24 flex flex-col justify-between gap-4 border-t border-hairline pt-8 text-[11px] uppercase tracking-[0.22em] text-muted-ink md:flex-row">
+          <p>© 2026 Aureva Estates. All rights reserved.</p>
+          <div className="flex gap-8">
+            <a className="link-underline" href="#">Privacy</a>
+            <a className="link-underline" href="#">Terms</a>
+            <a className="link-underline" href="#">Instagram</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// --- Rovoche Signature -----------------------------------------------------
+
+function RovocheFooterSignature() {
+  return (
+    <section className="bg-ivory">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-10">
+        <div className="gold-line" />
+        <div className="py-20 text-center md:py-28">
+          <p className="font-serif text-4xl leading-[1.1] tracking-[-0.01em] text-warm-black md:text-6xl">
+            Built on Rock.{" "}
+            <span className="survey-mark font-light">Crafted to Last.</span>
+          </p>
+          <p className="mt-10 text-[13px] uppercase tracking-[0.32em] text-muted-ink">
+            —{" "}
+            <a
+              href="https://www.rovoche.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-gold"
+            >
+              Rovoche
+            </a>
+          </p>
+          <p className="mt-6 text-[11px] uppercase tracking-[0.28em] text-muted-ink/70">
+            Demo Experience for AUREVA Estates
+          </p>
+        </div>
+        <div className="gold-line" />
+      </div>
+      <div className="h-16" />
+    </section>
+  );
+}
+
+// --- Floating Pill ---------------------------------------------------------
+
+function FloatingPill() {
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 1400);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className={`fixed bottom-5 left-5 z-50 transition-all duration-700 ease-out md:bottom-6 md:left-6 ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+      }`}
+    >
+      <a
+        href="https://www.rovoche.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex items-center gap-3 rounded-full border border-warm-black/10 bg-ivory/70 py-2.5 pl-4 pr-2 shadow-[0_10px_40px_-12px_rgba(20,18,15,0.25)] backdrop-blur-xl"
+      >
+        <span className="relative inline-flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-70" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.28em] text-charcoal/80">
+          Concept By
+        </span>
+        <span className="text-[11px] font-semibold tracking-[0.14em] text-warm-black">
+          ROVOCHÉ
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDismissed(true);
+          }}
+          aria-label="Dismiss"
+          className="ml-1 grid h-6 w-6 place-items-center rounded-full text-charcoal/60 transition-colors hover:bg-warm-black/5 hover:text-charcoal"
+        >
+          <span className="text-sm leading-none">×</span>
+        </button>
+      </a>
+    </div>
+  );
 }
