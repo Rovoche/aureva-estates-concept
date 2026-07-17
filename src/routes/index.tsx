@@ -338,9 +338,9 @@ function CustomCursor() {
     };
 
     const loop = () => {
-      // Ring lags the dot slightly for a weighted, non-robotic feel.
-      ringX += (targetX - ringX) * 0.18;
-      ringY += (targetY - ringY) * 0.18;
+      // Ring lags the dot slightly for a weighted feel, not a laggy one.
+      ringX += (targetX - ringX) * 0.35;
+      ringY += (targetY - ringY) * 0.35;
       if (ringRef.current) {
         ringRef.current.style.transform = `translate(${ringX}px, ${ringY}px)`;
       }
@@ -362,9 +362,7 @@ function CustomCursor() {
   return (
     <>
       <div ref={dotRef} className="cursor-dot" aria-hidden="true" />
-      <div ref={ringRef} className="cursor-ring" aria-hidden="true">
-        <RegisterMark className="h-full w-full text-current" />
-      </div>
+      <div ref={ringRef} className="cursor-ring" aria-hidden="true" />
     </>
   );
 }
@@ -541,43 +539,6 @@ function Hero() {
             "linear-gradient(180deg, rgba(10,12,18,0.38) 0%, rgba(10,12,18,0) 18%, rgba(10,12,18,0) 55%, rgba(10,12,18,0.5) 100%)",
         }}
       />
-
-      {/* Signature: an abstracted survey drawing of a reclaimed Lagos
-          waterfront parcel — the site's one graphic idea, kept quiet
-          enough to sit behind the headline rather than compete with it. */}
-      <svg
-        aria-hidden
-        viewBox="0 0 1600 900"
-        preserveAspectRatio="xMidYMid slice"
-        className="pointer-events-none absolute inset-0 z-[5] h-full w-full"
-      >
-        <g fill="none" stroke="var(--ivory)" strokeWidth="1" opacity="0.22">
-          <path d="M -20 640 C 220 560, 360 610, 520 540 S 780 460, 940 500 S 1180 420, 1360 470 L 1620 430" />
-          <path d="M -20 700 C 240 630, 400 670, 560 610 S 800 540, 980 570 S 1200 500, 1400 540 L 1620 500" strokeDasharray="2 7" />
-        </g>
-        <g fill="none" stroke="var(--gold-soft)" strokeWidth="1" opacity="0.55">
-          <polygon points="1120,330 1320,300 1360,430 1180,470" />
-          <line x1="1120" y1="330" x2="1320" y2="300" strokeDasharray="4 5" opacity="0.5" />
-        </g>
-        {[
-          [1120, 330], [1320, 300], [1360, 430], [1180, 470],
-        ].map(([cx, cy]) => (
-          <g key={`${cx}-${cy}`} stroke="var(--gold-soft)" opacity="0.6">
-            <line x1={cx - 6} y1={cy} x2={cx + 6} y2={cy} />
-            <line x1={cx} y1={cy - 6} x2={cx} y2={cy + 6} />
-          </g>
-        ))}
-        <text x="1132" y="386" fontFamily="var(--font-mono)" fontSize="11" fill="var(--gold-soft)" opacity="0.75">
-          LOT 07A — 0.42 HA
-        </text>
-        <g stroke="var(--ivory)" opacity="0.3">
-          <line x1="90" y1="120" x2="90" y2="168" />
-          <line x1="72" y1="120" x2="108" y2="120" />
-        </g>
-        <text x="80" y="192" fontFamily="var(--font-mono)" fontSize="11" fill="var(--ivory)" opacity="0.4">
-          N
-        </text>
-      </svg>
 
       <div className="relative z-10 flex h-full flex-col justify-between px-6 py-28 md:px-12 md:py-32">
         <div />
