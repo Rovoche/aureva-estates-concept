@@ -5,8 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-serif: "Cormorant Garamond", "Times New Roman", serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", "Iowan Old Style", serif;
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
   --color-ivory: var(--ivory);
   --color-stone-warm: var(--stone-warm);
@@ -17,6 +18,7 @@
   --color-gold-soft: var(--gold-soft);
   --color-muted-ink: var(--muted-ink);
   --color-hairline: var(--hairline);
+  --color-lagoon: var(--lagoon);
 
   --color-background: var(--ivory);
   --color-foreground: var(--charcoal);
@@ -42,15 +44,21 @@
 :root {
   --radius: 0.125rem;
 
-  --ivory: oklch(0.975 0.008 85);
-  --stone-warm: oklch(0.94 0.01 80);
-  --sand: oklch(0.90 0.018 75);
-  --charcoal: oklch(0.24 0.008 60);
-  --warm-black: oklch(0.16 0.006 60);
-  --gold: oklch(0.68 0.075 75);
-  --gold-soft: oklch(0.78 0.05 80);
-  --muted-ink: oklch(0.48 0.01 60);
-  --hairline: oklch(0.86 0.012 75);
+  /* Stone paper — cooler + greyer than the standard AI-luxury cream */
+  --ivory: oklch(0.955 0.012 92);
+  --stone-warm: oklch(0.92 0.015 88);
+  --sand: oklch(0.87 0.02 85);
+  /* Ink indigo — blue-black referencing lagoon water at night, not brown warm-black */
+  --charcoal: oklch(0.27 0.02 265);
+  --warm-black: oklch(0.15 0.025 265);
+  /* Laterite rust — Lagos red-earth/brick, deliberately darker & more saturated than
+     a gold/terracotta accent so it reads as mineral, not decorative */
+  --gold: oklch(0.46 0.135 40);
+  --gold-soft: oklch(0.62 0.1 45);
+  /* Lagoon — a rare third accent, sea-glass green, used sparingly */
+  --lagoon: oklch(0.5 0.06 175);
+  --muted-ink: oklch(0.5 0.02 265);
+  --hairline: oklch(0.82 0.015 85);
 }
 
 @layer base {
@@ -67,16 +75,17 @@
     background-color: var(--ivory);
     color: var(--charcoal);
     font-family: var(--font-sans);
-    font-weight: 300;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-serif);
-    font-weight: 400;
+    font-weight: 420;
     letter-spacing: -0.01em;
     color: var(--warm-black);
+    font-optical-sizing: auto;
   }
 
   ::selection {
@@ -85,13 +94,26 @@
   }
 }
 
+/* A survey/plot annotation, not a decorative kicker: small mono tag with a
+   leading tick, used only where the label carries real information (a
+   status, a place, a reference) — cut anywhere it just restates the heading. */
 @utility eyebrow {
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted-ink);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 1.1em;
+    height: 1px;
+    background: currentColor;
+  }
 }
 
 @utility hairline {
@@ -104,6 +126,13 @@
   height: 1px;
   background: var(--gold);
   opacity: 0.55;
+}
+
+@utility plot-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  color: var(--muted-ink);
 }
 
 @utility link-underline {
@@ -160,4 +189,87 @@
 }
 .img-mask.is-visible {
   clip-path: inset(0 0 0 0);
+}
+
+.plot-draw path,
+.plot-draw polygon,
+.plot-draw line,
+.plot-draw circle {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 2.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.plot-draw text {
+  opacity: 0;
+  transition: opacity 1s ease 1.6s;
+}
+.plot-draw.is-visible path,
+.plot-draw.is-visible polygon,
+.plot-draw.is-visible line,
+.plot-draw.is-visible circle {
+  stroke-dashoffset: 0;
+}
+.plot-draw.is-visible text {
+  opacity: 1;
+}
+
+/* Signature emphasis device: a benchmark tick + baseline under a phrase,
+   standing in for the italic-plus-colour-word headline formula. No italic,
+   no coloured text — the emphasis is a drawn line, not a font swap. */
+.survey-mark {
+  position: relative;
+  display: inline-block;
+  font-style: normal;
+}
+.survey-mark::before {
+  content: "+";
+  position: absolute;
+  left: -0.9em;
+  top: 0.12em;
+  font-family: var(--font-mono);
+  font-size: 0.42em;
+  color: var(--gold);
+}
+.survey-mark::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.08em;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.75;
+}
+
+/* Signature device #1: drafting registration marks at each corner of a
+   photo frame — quiet, consistent, applied everywhere a photo appears.
+   Pure background-image corner brackets, so it animates with img-mask
+   without needing extra DOM nodes. */
+.plot-frame {
+  position: relative;
+  background-image:
+    linear-gradient(to right, var(--gold) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, var(--gold) 1.5px, transparent 1.5px),
+    linear-gradient(to left, var(--gold) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, var(--gold) 1.5px, transparent 1.5px),
+    linear-gradient(to right, var(--gold) 1.5px, transparent 1.5px),
+    linear-gradient(to top, var(--gold) 1.5px, transparent 1.5px),
+    linear-gradient(to left, var(--gold) 1.5px, transparent 1.5px),
+    linear-gradient(to top, var(--gold) 1.5px, transparent 1.5px);
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position:
+    top -1px left -1px, top -1px left -1px,
+    top -1px right -1px, top -1px right -1px,
+    bottom -1px right -1px, bottom -1px right -1px,
+    bottom -1px left -1px, bottom -1px left -1px;
+}
+
+/* Signature motif: a plot-boundary line drawing, used in the hero and footer.
+   Kept to hairline strokes so it reads as drafting linework, not illustration. */
+.plot-mark {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
 }
