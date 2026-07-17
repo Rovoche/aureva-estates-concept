@@ -435,12 +435,11 @@ function Hero() {
         onError={handleVideoError}
         poster={img("31032367", 1920)}
       />
-      <div className="absolute inset-0 bg-warm-black/35" />
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, rgba(20,18,15,0.35) 0%, rgba(20,18,15,0) 30%, rgba(20,18,15,0) 60%, rgba(20,18,15,0.55) 100%)",
+            "linear-gradient(180deg, rgba(10,12,18,0.38) 0%, rgba(10,12,18,0) 18%, rgba(10,12,18,0) 55%, rgba(10,12,18,0.5) 100%)",
         }}
       />
 
@@ -657,7 +656,13 @@ function LuxuryLiving() {
           preload="metadata"
         onError={handleVideoError}
         />
-        <div className="absolute inset-0 bg-warm-black/25" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(10,12,18,0) 50%, rgba(10,12,18,0.55) 100%)",
+          }}
+        />
         <div className="absolute inset-x-0 bottom-0 p-6 md:p-14">
           <p className="eyebrow text-ivory/70">A Way of Living</p>
           <h2 className="mt-4 max-w-3xl font-serif text-4xl leading-[1.02] text-ivory md:text-7xl">
@@ -803,7 +808,7 @@ function Developments() {
 function Investment() {
   return (
     <section className="relative overflow-hidden bg-warm-black text-ivory">
-      <div className="absolute inset-0 opacity-40">
+      <div className="absolute inset-0">
         <video
           className="h-full w-full object-cover"
           src={AERIAL_VIDEO}
@@ -816,49 +821,58 @@ function Investment() {
         onError={handleVideoError}
         />
       </div>
-      <div className="absolute inset-0 bg-warm-black/60" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(10,12,18,0.72) 0%, rgba(10,12,18,0.35) 42%, rgba(10,12,18,0.15) 100%)",
+        }}
+      />
 
-      <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 gap-16 px-6 py-28 md:grid-cols-12 md:gap-12 md:px-10 md:py-40">
-        <div className="md:col-span-5">
-          <p className="eyebrow reveal text-gold-soft">Investment Counsel</p>
-          <h2 className="reveal mt-6 font-serif text-4xl leading-[1.05] text-ivory md:text-6xl">
-            For those buying with the next generation in mind.
+      <div className="relative mx-auto max-w-[1440px] px-6 py-28 md:px-10 md:py-40">
+        <p className="eyebrow reveal text-gold-soft">Investment Counsel</p>
+
+        <div className="mt-10 grid grid-cols-1 items-end gap-10 md:grid-cols-12 md:gap-8">
+          <h2 className="reveal font-serif text-[22vw] leading-[0.82] tracking-[-0.03em] text-ivory md:col-span-7 md:text-[10.5vw]">
+            1/3
           </h2>
+          <p className="reveal max-w-md text-[15px] leading-[1.9] text-ivory/80 md:col-span-5 md:pb-4">
+            of our clients acquire property in Lagos as a long-hold asset. We
+            provide considered counsel on rental yield, currency exposure,
+            tenure and eventual disposition — quietly, and over a longer
+            horizon than most brokers are willing to keep.
+          </p>
         </div>
 
-        <div className="md:col-span-6 md:col-start-7">
-          <p className="reveal max-w-lg text-[15px] leading-[1.9] text-ivory/80">
-            Approximately a third of our clients acquire property in Lagos as a
-            long-hold asset. We provide considered counsel on rental yield,
-            currency exposure, tenure and eventual disposition — quietly, and
-            over a longer horizon than most brokers are willing to keep.
-          </p>
-
-          <div className="reveal mt-14 grid grid-cols-1 gap-x-10 gap-y-8 border-t border-ivory/15 pt-10 sm:grid-cols-2">
-            {[
-              {
-                t: "Waterfront hold",
-                c: "Ikoyi & Banana Island — appreciation led, low turnover.",
-              },
-              {
-                t: "Yielding penthouses",
-                c: "Eko Atlantic & Victoria Island — corporate lets, USD-linked.",
-              },
-              {
-                t: "Land banking",
-                c: "Selected Lekki parcels, held under transparent title.",
-              },
-              {
-                t: "Development co-investment",
-                c: "By invitation, alongside two Lagos-based practices.",
-              },
-            ].map((x) => (
-              <div key={x.t}>
-                <p className="font-serif text-xl text-ivory">{x.t}</p>
-                <p className="mt-2 text-[13px] leading-relaxed text-ivory/60">{x.c}</p>
-              </div>
-            ))}
-          </div>
+        <div className="reveal mt-16 divide-y divide-ivory/15 border-t border-ivory/15 md:mt-24">
+          {[
+            {
+              t: "Waterfront hold",
+              c: "Ikoyi & Banana Island — appreciation led, low turnover.",
+            },
+            {
+              t: "Yielding penthouses",
+              c: "Eko Atlantic & Victoria Island — corporate lets, USD-linked.",
+            },
+            {
+              t: "Land banking",
+              c: "Selected Lekki parcels, held under transparent title.",
+            },
+            {
+              t: "Development co-investment",
+              c: "By invitation, alongside two Lagos-based practices.",
+            },
+          ].map((x) => (
+            <div
+              key={x.t}
+              className="flex flex-col gap-2 py-6 md:flex-row md:items-baseline md:gap-10 md:py-7"
+            >
+              <p className="font-mono text-[11px] tracking-[0.01em] text-gold md:w-64 md:shrink-0">
+                {x.t.toUpperCase()}
+              </p>
+              <p className="max-w-lg text-[14px] leading-relaxed text-ivory/65">{x.c}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -953,20 +967,15 @@ function WhyAureva() {
           <div className="border-t border-hairline">
             {rows.map((r) => (
               <div
-                key={r.n}
-                className="reveal grid grid-cols-12 gap-6 border-b border-hairline py-10 md:py-14"
+                key={r.t}
+                className="reveal border-b border-hairline py-10 md:py-14"
               >
-                <div className="col-span-2 md:col-span-1">
-                  <p className="font-serif text-lg text-gold md:text-xl">{r.n}</p>
-                </div>
-                <div className="col-span-10 md:col-span-11">
-                  <h3 className="font-serif text-2xl leading-tight md:text-[2rem]">
-                    {r.t}
-                  </h3>
-                  <p className="mt-4 max-w-xl text-[14px] leading-[1.85] text-charcoal/80">
-                    {r.c}
-                  </p>
-                </div>
+                <h3 className="font-serif text-2xl leading-tight md:text-[2rem]">
+                  {r.t}
+                </h3>
+                <p className="mt-4 max-w-xl text-[14px] leading-[1.85] text-charcoal/80">
+                  {r.c}
+                </p>
               </div>
             ))}
           </div>
@@ -1065,7 +1074,7 @@ function Contact() {
   const [sent, setSent] = useState(false);
   return (
     <section id="contact" className="relative overflow-hidden bg-warm-black text-ivory">
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0">
         <video
           className="h-full w-full object-cover"
           src={BEDROOM_VIDEO}
@@ -1078,7 +1087,13 @@ function Contact() {
         onError={handleVideoError}
         />
       </div>
-      <div className="absolute inset-0 bg-warm-black/70" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(10,12,18,0.7) 0%, rgba(10,12,18,0.4) 45%, rgba(10,12,18,0.2) 100%)",
+        }}
+      />
       <PlotLinework className="absolute -bottom-16 -right-16 z-[1] h-[420px] w-[420px] text-ivory/25 md:h-[520px] md:w-[520px]" />
       <RegisterMark className="absolute left-6 top-6 z-10 hidden text-ivory/40 md:block" />
 
