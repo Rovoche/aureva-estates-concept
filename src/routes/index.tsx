@@ -303,6 +303,72 @@ const FAQ = [
 
 // --- Reveal hook -----------------------------------------------------------
 
+// --- Custom cursor ----------------------------------------------------
+// A small survey-mark ring that trails the pointer and expands over
+// interactive elements. Fine-pointer devices only — never touches mobile.
+
+function CustomCursor() {
+  const dotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+
+    document.documentElement.classList.add("has-custom-cursor");
+
+    let ringX = window.innerWidth / 2;
+    let ringY = window.innerHeight / 2;
+    let targetX = ringX;
+    let targetY = ringY;
+    let raf = 0;
+
+    const onMove = (e: MouseEvent) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate(${targetX}px, ${targetY}px)`;
+      }
+    };
+
+    const onOver = (e: MouseEvent) => {
+      const hit = (e.target as HTMLElement)?.closest?.(
+        "a, button, [data-cursor-hover]",
+      );
+      ringRef.current?.classList.toggle("is-hovering", Boolean(hit));
+    };
+
+    const loop = () => {
+      // Ring lags the dot slightly for a weighted, non-robotic feel.
+      ringX += (targetX - ringX) * 0.18;
+      ringY += (targetY - ringY) * 0.18;
+      if (ringRef.current) {
+        ringRef.current.style.transform = `translate(${ringX}px, ${ringY}px)`;
+      }
+      raf = requestAnimationFrame(loop);
+    };
+
+    window.addEventListener("mousemove", onMove, { passive: true });
+    document.addEventListener("mouseover", onOver, { passive: true });
+    raf = requestAnimationFrame(loop);
+
+    return () => {
+      document.documentElement.classList.remove("has-custom-cursor");
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseover", onOver);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <>
+      <div ref={dotRef} className="cursor-dot" aria-hidden="true" />
+      <div ref={ringRef} className="cursor-ring" aria-hidden="true">
+        <RegisterMark className="h-full w-full text-current" />
+      </div>
+    </>
+  );
+}
+
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal, .img-mask, .plot-draw");
@@ -348,6 +414,7 @@ function AurevaHome() {
   useReveal();
   return (
     <div className="bg-ivory text-charcoal font-sans">
+      <CustomCursor />
       <Nav />
       <Hero />
       <About />
@@ -422,10 +489,42 @@ function Nav() {
 // --- Hero ------------------------------------------------------------------
 
 function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let raf = 0;
+    const heroHeight = window.innerHeight;
+
+    const apply = () => {
+      const progress = Math.min(1, Math.max(0, window.scrollY / heroHeight));
+      if (videoRef.current) {
+        videoRef.current.style.transform = `scale(${1 + progress * 0.08}) translateY(${progress * 40}px)`;
+      }
+      if (headlineRef.current) {
+        headlineRef.current.style.transform = `translateY(${progress * -70}px)`;
+        headlineRef.current.style.opacity = `${1 - progress * 1.1}`;
+      }
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <section id="top" className="relative h-[100svh] w-full overflow-hidden bg-warm-black">
       <video
-        className="absolute inset-0 h-full w-full object-cover"
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover will-change-transform"
         src={HERO_VIDEO}
         autoPlay
         muted
@@ -482,7 +581,7 @@ function Hero() {
 
       <div className="relative z-10 flex h-full flex-col justify-between px-6 py-28 md:px-12 md:py-32">
         <div />
-        <div className="max-w-4xl">
+        <div className="max-w-4xl" ref={headlineRef}>
           <h1 className="font-serif text-[13vw] leading-[0.95] tracking-[-0.02em] text-ivory md:text-[7.2vw]">
             Exceptional Homes.
             <br />
@@ -491,10 +590,15 @@ function Hero() {
         </div>
 
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <p className="max-w-md text-[13px] leading-relaxed text-ivory/80 md:text-sm">
-            A private practice representing waterfront residences, penthouses and heritage
-            villas across Lagos — introduced quietly, transacted with care.
-          </p>
+          <div className="max-w-md">
+            <p className="text-[13px] leading-relaxed text-ivory/80 md:text-sm">
+              A private practice representing waterfront residences, penthouses and heritage
+              villas across Lagos — introduced quietly, transacted with care.
+            </p>
+            <p className="mt-5 font-mono text-[11px] tracking-[0.01em] text-ivory/55">
+              ₦40B+ REPRESENTED · 60+ QUIET TRANSACTIONS · SINCE 2014
+            </p>
+          </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <a
               href="#properties"
